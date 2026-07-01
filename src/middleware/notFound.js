@@ -1,0 +1,11 @@
+/**
+ * 404 handler — catches all unmatched routes.
+ */
+const notFound = (_req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found',
+  });
+};
+
+module.exports = notFound;
