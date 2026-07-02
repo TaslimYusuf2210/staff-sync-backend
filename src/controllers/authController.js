@@ -1,0 +1,197 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const config = require('../config');
+const { Admin, Company } = require('../models');
+const AppError = require('../utils/AppError');
+
+/**
+ * POST /auth/register
+ * Register a new organisation / admin account.
+ */
+exports.register = async (req, res, next) => {
+  try {
+    const { companyName, email, description, password, confirmPassword, agreeTerms } = req.body;
+
+    // Validations
+    if (!companyName || companyName.length < 2) {
+      throw new AppError('Company name is required and must be at least 2 characters', 400);
+    }
+    if (!email) throw new AppError('Email is required', 400);
+    if (!password || password.length < 6) {
+      throw new AppError('Password must be at least 6 characters', 400);
+    }
+    if (password !== confirmPassword) {
+      throw new AppError('Passwords do not match', 400);
+    }
+    if (!agreeTerms) {
+      throw new AppError('You must agree to the terms', 400);
+    }
+
+    // Check existing admin
+    const existingAdmin = await Admin.findOne({ where: { email } });
+    if (existingAdmin) {
+      throw new AppError('An account with this email already exists', 400);
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Create admin
+    const admin = await Admin.create({
+      name: 'Admin',
+      email,
+      password: hashedPassword,
+      role: 'admin',
+    });
+
+    // Create company
+    const company = await Company.create({
+      name: companyName,
+      description: description || null,
+      adminId: admin.id,
+    });
+
+    // Generate token
+    const token = jwt.sign({ id: admin.id, role: admin.role }, config.jwt.secret, {
+      expiresIn: config.jwt.expiresIn,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Account created successfully',
+      data: {
+        token,
+        user: {
+          id: admin.id,
+          name: admin.name,
+          email: admin.email,
+          role: admin.role,
+        },
+        company: {
+          id: company.id,
+          name: company.name,
+          description: company.description,
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/login
+ * Authenticate an admin user and return a JWT token.
+ */
+exports.login = async (req, res, next) => {
+  try {
+    const { email, password, rememberMe } = req.body;
+
+    if (!email) throw new AppError('Email is required', 400);
+    if (!password || password.length < 6) {
+      throw new AppError('Password must be at least 6 characters', 400);
+    }
+
+    const admin = await Admin.findOne({ where: { email } });
+    if (!admin) {
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    const isMatch = await bcrypt.compare(password, admin.password);
+    if (!isMatch) {
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    const expiresIn = rememberMe ? '30d' : config.jwt.expiresIn;
+    const token = jwt.sign({ id: admin.id, role: admin.role }, config.jwt.secret, {
+      expiresIn,
+    });
+
+    // Calculate expiresIn seconds
+    const expiresInSeconds = rememberMe ? 30 * 24 * 60 * 60 : 7 * 24 * 60 * 60;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        token,
+        expiresIn: expiresInSeconds,
+        user: {
+          id: admin.id,
+          name: admin.name,
+          email: admin.email,
+          role: admin.role,
+          profilePicture: admin.profilePicture,
+        },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/forgot-password
+ * Send a password reset link to the user's email.
+ */
+exports.forgotPassword = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) throw new AppError('Email is required', 400);
+
+    const admin = await Admin.findOne({ where: { email } });
+    if (!admin) {
+      // Don't reveal whether the email exists
+      return res.json({
+        success: true,
+        message: 'Password reset link sent to your email',
+      });
+    }
+
+    // In a real app: generate reset token, send email, etc.
+    // For now we just return success
+
+    res.json({
+      success: true,
+      message: 'Password reset link sent to your email',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /auth/change-password
+ * Update the authenticated user's password.
+ */
+exports.changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword, confirmPassword } = req.body;
+
+    if (!currentPassword) throw new AppError('Current password is required', 400);
+    if (!newPassword || newPassword.length < 6) {
+      throw new AppError('New password must be at least 6 characters', 400);
+    }
+    if (newPassword !== confirmPassword) {
+      throw new AppError('Passwords do not match', 400);
+    }
+
+    const admin = await Admin.findByPk(req.user.id);
+    if (!admin) throw new AppError('Admin not found', 404);
+
+    const isMatch = await bcrypt.compare(currentPassword, admin.password);
+    if (!isMatch) {
+      throw new AppError('Current password is incorrect', 401);
+    }
+
+    admin.password = await bcrypt.hash(newPassword, 12);
+    await admin.save();
+
+    res.json({
+      success: true,
+      message: 'Password changed successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};

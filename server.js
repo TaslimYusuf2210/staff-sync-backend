@@ -1,7 +1,18 @@
 const app = require('./src/app');
 const config = require('./src/config');
+const { sequelize, testConnection } = require('./src/config/database');
 
-const start = () => {
+// Load models to register them with Sequelize before syncing
+require('./src/models');
+
+const start = async () => {
+  const dbConnected = await testConnection();
+
+  if (dbConnected) {
+    await sequelize.sync({ alter: config.isDev });
+    console.log('✅ Database tables synced');
+  }
+
   app.listen(config.port, () => {
     console.log(`🚀 StaffSync server running on port ${config.port}`);
     console.log(`   Environment: ${config.nodeEnv}`);

@@ -20,6 +20,10 @@ app.use(cors({ origin: config.cors.origin }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ─── Static Files (for uploads) ──────────────────────────────
+
+app.use('/uploads', express.static(config.upload.uploadDir));
+
 // ─── Routes ──────────────────────────────────────────────────
 
 app.use('/api', routes);

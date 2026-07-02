@@ -1,13 +1,22 @@
 const { Router } = require('express');
 const healthRoutes = require('./health');
+const authRoutes = require('./auth');
+const employeeRoutes = require('./employees');
+const departmentRoutes = require('./departments');
+const dashboardRoutes = require('./dashboard');
+const reportRoutes = require('./reports');
+const settingsRoutes = require('./settings');
+const uploadRoutes = require('./upload');
 
 const router = Router();
 
-// Health check
 router.use('/health', healthRoutes);
-
-// Future routes can be added here:
-// router.use('/users', require('./users'));
-// router.use('/employees', require('./employees'));
+router.use('/auth', authRoutes);
+router.use('/employees', employeeRoutes);
+router.use('/departments', departmentRoutes);
+router.use('/dashboard', dashboardRoutes);
+router.use('/reports', reportRoutes);
+router.use('/settings', settingsRoutes);
+router.use('/upload', uploadRoutes);
 
 module.exports = router;
