@@ -10,18 +10,21 @@ const AppError = require('../utils/AppError');
  */
 exports.register = async (req, res, next) => {
   try {
-    const { companyName, email, description, password, confirmPassword, agreeTerms } = req.body;
+    const { companyName, email, description, phone, address, password, agreeTerms } = req.body;
 
     // Validations
     if (!companyName || companyName.length < 2) {
       throw new AppError('Company name is required and must be at least 2 characters', 400);
     }
     if (!email) throw new AppError('Email is required', 400);
+    if (!description) throw new AppError('Description is required', 400);
+    if (!phone) throw new AppError('Phone number is required', 400);
+    if (!/^\d{11}$/.test(phone)) {
+      throw new AppError('Phone number must be exactly 11 digits', 400);
+    }
+    if (!address) throw new AppError('Address is required', 400);
     if (!password || password.length < 6) {
       throw new AppError('Password must be at least 6 characters', 400);
-    }
-    if (password !== confirmPassword) {
-      throw new AppError('Passwords do not match', 400);
     }
     if (!agreeTerms) {
       throw new AppError('You must agree to the terms', 400);
@@ -48,6 +51,8 @@ exports.register = async (req, res, next) => {
     const company = await Company.create({
       name: companyName,
       description: description || null,
+      phoneNumber: phone,
+      address,
       adminId: admin.id,
     });
 
@@ -71,6 +76,8 @@ exports.register = async (req, res, next) => {
           id: company.id,
           name: company.name,
           description: company.description,
+          phoneNumber: company.phoneNumber,
+          address: company.address,
         },
       },
     });

@@ -90,8 +90,9 @@ Register a new organisation / admin account.
   "companyName": "Rocks Company Ltd",
   "email": "admin@rockscompany.com",
   "description": "Corporate Headquarters",
+  "phone": "+234-800-000-0000",
+  "address": "42 Example Street, Lagos, Nigeria",
   "password": "securePassword123",
-  "confirmPassword": "securePassword123",
   "agreeTerms": true
 }
 ```
@@ -113,7 +114,9 @@ Register a new organisation / admin account.
     "company": {
       "id": "comp-1",
       "name": "Rocks Company Ltd",
-      "description": "Corporate Headquarters"
+      "description": "Corporate Headquarters",
+      "phoneNumber": "+234-800-000-0000",
+      "address": "42 Example Street, Lagos, Nigeria"
     }
   }
 }
@@ -125,8 +128,9 @@ Register a new organisation / admin account.
 | companyName | string | Required, min 2 characters |
 | email | string | Required, valid email format, must be unique |
 | description | string | Required, one of predefined company types |
+| phone | string | Required, must be exactly 11 digits |
+| address | string | Required, company physical address |
 | password | string | Required, min 6 characters |
-| confirmPassword| string | Required, must match `password` |
 | agreeTerms | boolean | Required, must be `true` |
 
 ---
