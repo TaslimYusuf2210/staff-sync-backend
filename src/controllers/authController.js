@@ -216,10 +216,15 @@ exports.sendOtp = async (req, res, next) => {
 
     if (!email) throw new AppError('Email is required', 400);
 
-    // Check if email is already registered
-    const existingAdmin = await Admin.findOne({ where: { email } });
-    if (existingAdmin) {
-      throw new AppError('An account with this email already exists', 400);
+    // Check if email is already registered (skip if DB is unavailable)
+    try {
+      const existingAdmin = await Admin.findOne({ where: { email } });
+      if (existingAdmin) {
+        throw new AppError('An account with this email already exists', 400);
+      }
+    } catch (dbError) {
+      if (dbError instanceof AppError) throw dbError;
+      console.warn('DB unavailable — skipping duplicate email check:', dbError.message);
     }
 
     // Generate a random 6-digit OTP
