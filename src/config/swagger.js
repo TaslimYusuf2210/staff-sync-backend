@@ -69,13 +69,14 @@ const options = {
         },
         RegisterRequest: {
           type: 'object',
-          required: ['companyName', 'email', 'password', 'confirmPassword', 'agreeTerms'],
+          required: ['companyName', 'email', 'description', 'phone', 'address', 'password', 'agreeTerms'],
           properties: {
             companyName: { type: 'string', minLength: 2, example: 'Rocks Company Ltd' },
             email: { type: 'string', format: 'email', example: 'admin@rockscompany.com' },
             description: { type: 'string', example: 'Corporate Headquarters' },
+            phone: { type: 'string', example: '08000000000' },
+            address: { type: 'string', example: '42 Example Street, Lagos, Nigeria' },
             password: { type: 'string', minLength: 6, example: 'securePassword123' },
-            confirmPassword: { type: 'string', example: 'securePassword123' },
             agreeTerms: { type: 'boolean', example: true },
           },
         },
@@ -92,6 +93,21 @@ const options = {
                 company: { $ref: '#/components/schemas/Company' },
               },
             },
+          },
+        },
+        SendOtpRequest: {
+          type: 'object',
+          required: ['email'],
+          properties: {
+            email: { type: 'string', format: 'email', example: 'admin@rockscompany.com' },
+          },
+        },
+        VerifyOtpRequest: {
+          type: 'object',
+          required: ['email', 'otp'],
+          properties: {
+            email: { type: 'string', format: 'email', example: 'admin@rockscompany.com' },
+            otp: { type: 'string', example: '483291' },
           },
         },
         User: {
@@ -318,6 +334,30 @@ const options = {
           responses: {
             201: { description: 'Account created', content: { 'application/json': { schema: { $ref: '#/components/schemas/RegisterResponse' } } } },
             400: { description: 'Validation error', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          },
+        },
+      },
+      '/auth/send-otp': {
+        post: {
+          tags: ['Authentication'],
+          summary: 'Send OTP',
+          description: 'Send a 6-digit OTP to the user\'s email for registration verification.',
+          requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/SendOtpRequest' } } } },
+          responses: {
+            200: { description: 'OTP sent', content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean' }, message: { type: 'string' } } } } } },
+            400: { description: 'Validation error or email already registered', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          },
+        },
+      },
+      '/auth/verify-otp': {
+        post: {
+          tags: ['Authentication'],
+          summary: 'Verify OTP',
+          description: 'Verify the 6-digit OTP sent to the user\'s email.',
+          requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/VerifyOtpRequest' } } } },
+          responses: {
+            200: { description: 'Email verified', content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean' }, message: { type: 'string' }, data: { type: 'object', properties: { verificationToken: { type: 'string' } } } } } } } },
+            400: { description: 'Invalid or expired OTP', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
           },
         },
       },

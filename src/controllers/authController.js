@@ -1,8 +1,11 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const config = require('../config');
 const { Admin, Company } = require('../models');
 const AppError = require('../utils/AppError');
+const { setOtp, getOtp, deleteOtp } = require('../utils/otpStore');
+const { sendOtpEmail } = require('../utils/email');
 
 /**
  * POST /auth/register
@@ -197,6 +200,86 @@ exports.changePassword = async (req, res, next) => {
     res.json({
       success: true,
       message: 'Password changed successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/send-otp
+ * Generate a 6-digit OTP and send it to the user's email.
+ */
+exports.sendOtp = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) throw new AppError('Email is required', 400);
+
+    // Check if email is already registered
+    const existingAdmin = await Admin.findOne({ where: { email } });
+    if (existingAdmin) {
+      throw new AppError('An account with this email already exists', 400);
+    }
+
+    // Generate a random 6-digit OTP
+    const otp = crypto.randomInt(100_000, 999_999).toString();
+
+    // Store OTP with 5-minute expiry
+    setOtp(email, otp, 5 * 60 * 1000);
+
+    // Send OTP email
+    await sendOtpEmail(email, otp);
+
+    res.json({
+      success: true,
+      message: 'OTP sent to email',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/verify-otp
+ * Verify the OTP sent to the user's email.
+ */
+exports.verifyOtp = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email) throw new AppError('Email is required', 400);
+    if (!otp) throw new AppError('OTP is required', 400);
+
+    const record = getOtp(email);
+
+    if (!record) {
+      throw new AppError('Invalid or expired OTP', 400);
+    }
+
+    if (record.expiresAt <= Date.now()) {
+      deleteOtp(email);
+      throw new AppError('Invalid or expired OTP', 400);
+    }
+
+    if (record.otp !== otp) {
+      throw new AppError('Invalid or expired OTP', 400);
+    }
+
+    // OTP is valid — clean up and mark as verified
+    deleteOtp(email);
+
+    // Generate a temporary verification token (valid for 15 min)
+    const verificationToken = jwt.sign(
+      { email, purpose: 'email-verification' },
+      config.jwt.secret,
+      { expiresIn: '15m' },
+    );
+
+    res.json({
+      success: true,
+      message: 'Email verified',
+      data: { verificationToken },
     });
   } catch (error) {
     next(error);

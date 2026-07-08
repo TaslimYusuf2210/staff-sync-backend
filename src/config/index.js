@@ -30,6 +30,15 @@ const config = {
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
   },
 
+  // Brevo (email)
+  brevo: {
+    smtpHost: process.env.BREVO_SMTP_HOST || 'smtp-relay.brevo.com',
+    smtpPort: parseInt(process.env.BREVO_SMTP_PORT, 10) || 587,
+    smtpUser: process.env.BREVO_SMTP_USER || '',
+    smtpPass: process.env.BREVO_SMTP_PASS || '',
+    fromEmail: process.env.BREVO_FROM_EMAIL || 'noreply@staffsync.com',
+  },
+
   // Upload
   upload: {
     maxFileSize: 10 * 1024 * 1024, // 10MB

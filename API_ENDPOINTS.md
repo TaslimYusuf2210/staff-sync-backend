@@ -135,6 +135,89 @@ Register a new organisation / admin account.
 
 ---
 
+### 1.5 Send OTP
+
+Send a 6-digit OTP to the user's email for registration verification.
+
+**`POST /auth/send-otp`**
+
+**Request Body:**
+
+```json
+{
+  "email": "admin@rockscompany.com"
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "OTP sent to email"
+}
+```
+
+**Error Response (400):**
+
+```json
+{
+  "success": false,
+  "message": "An account with this email already exists"
+}
+```
+
+**Validation:**
+| Field | Type | Rules |
+|-------|------|-------|
+| email | string | Required, valid email format, must not already be registered |
+
+---
+
+### 1.6 Verify OTP
+
+Verify the 6-digit OTP sent to the user's email.
+
+**`POST /auth/verify-otp`**
+
+**Request Body:**
+
+```json
+{
+  "email": "admin@rockscompany.com",
+  "otp": "483291"
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "Email verified",
+  "data": {
+    "verificationToken": "eyJhbGciOiJIUzI1NiIs..."
+  }
+}
+```
+
+**Error Response (400):**
+
+```json
+{
+  "success": false,
+  "message": "Invalid or expired OTP"
+}
+```
+
+**Validation:**
+| Field | Type | Rules |
+|-------|------|-------|
+| email | string | Required, must match the email used to request the OTP |
+| otp | string | Required, 6-digit numeric code |
+
+---
+
 ### 1.3 Forgot Password
 
 Send a password reset link to the user's email.
