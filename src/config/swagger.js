@@ -397,11 +397,10 @@ const options = {
               'application/json': {
                 schema: {
                   type: 'object',
-                  required: ['currentPassword', 'newPassword', 'confirmPassword'],
+                  required: ['currentPassword', 'newPassword'],
                   properties: {
                     currentPassword: { type: 'string', example: 'oldPassword123' },
                     newPassword: { type: 'string', minLength: 6, example: 'newSecurePass456' },
-                    confirmPassword: { type: 'string', example: 'newSecurePass456' },
                   },
                 },
               },

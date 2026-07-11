@@ -192,14 +192,11 @@ exports.forgotPassword = async (req, res, next) => {
  */
 exports.changePassword = async (req, res, next) => {
   try {
-    const { currentPassword, newPassword, confirmPassword } = req.body;
+    const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword) throw new AppError('Current password is required', 400);
     if (!newPassword || newPassword.length < 6) {
       throw new AppError('New password must be at least 6 characters', 400);
-    }
-    if (newPassword !== confirmPassword) {
-      throw new AppError('Passwords do not match', 400);
     }
 
     const admin = await Admin.findByPk(req.user.id);

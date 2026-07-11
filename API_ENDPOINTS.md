@@ -291,8 +291,7 @@ Update the authenticated user's password.
 ```json
 {
   "currentPassword": "oldPassword123",
-  "newPassword": "newSecurePass456",
-  "confirmPassword": "newSecurePass456"
+  "newPassword": "newSecurePass456"
 }
 ```
 
@@ -1370,9 +1369,8 @@ Upload employee documents, profile photos, or any attachment.
 | 25  | GET    | `/reports/salary-summary`         | Salary/payroll report          |
 | 26  | GET    | `/reports/hiring-trend`           | Hiring growth trend data       |
 | 27  | GET    | `/reports/export`                 | Export report as CSV/Excel/PDF |
-| 28  | GET    | `/settings`                       | Get settings                   |
-| 29  | PUT    | `/settings/admin`                 | Update admin profile           |
-| 30  | PUT    | `/settings/company`               | Update company info            |
+| 28  | GET    | `/settings`                       | Get company settings           |
+| 29  | PUT    | `/settings/company`               | Update company info            |
 | 31  | POST   | `/upload`                         | Upload file (documents/photos) |
 
 ---
