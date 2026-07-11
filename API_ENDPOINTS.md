@@ -135,7 +135,44 @@ Register a new organisation / admin account.
 
 ---
 
-### 1.5 Send OTP
+### 1.5 Get Current User
+
+Return the currently authenticated user's company details.
+
+**`GET /auth/me`**
+
+**Headers:** `Authorization: Bearer <token>`
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "company": {
+      "id": "comp-1",
+      "name": "Rocks Company Ltd",
+      "description": "Corporate Headquarters",
+      "email": "admin@rockscompany.com",
+      "phoneNumber": "08000000000",
+      "address": "42 Example Street"
+    }
+  }
+}
+```
+
+**Error Response (401):**
+
+```json
+{
+  "success": false,
+  "message": "Authentication required"
+}
+```
+
+---
+
+### 1.6 Send OTP
 
 Send a 6-digit OTP to the user's email for registration verification.
 
@@ -174,7 +211,7 @@ Send a 6-digit OTP to the user's email for registration verification.
 
 ---
 
-### 1.6 Verify OTP
+### 1.7 Verify OTP
 
 Verify the 6-digit OTP sent to the user's email.
 
@@ -1075,13 +1112,10 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
 {
   "success": true,
   "data": {
-    "admin": {
-      "name": "Admin Strator",
-      "email": "admin@rockscompany.com",
-      "profilePicture": "https://cdn.staffsync.com/images/admin.jpg"
-    },
     "company": {
+      "id": "comp-1",
       "name": "Rocks Company Ltd",
+      "description": "Corporate Headquarters",
       "email": "contact@rockscompany.com",
       "phoneNumber": "+1 312 908 1234",
       "address": "123 Avenue block, Chicago, IL"
@@ -1092,39 +1126,7 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
 
 ---
 
-### 6.2 Update Admin Profile
-
-**`PUT /settings/admin`**
-
-**Request Body:**
-
-```json
-{
-  "name": "Admin Strator",
-  "email": "admin@rockscompany.com",
-  "profilePicture": "https://cdn.staffsync.com/images/admin-new.jpg"
-}
-```
-
-**Success Response (200):**
-
-```json
-{
-  "success": true,
-  "message": "Admin profile updated successfully",
-  "data": {
-    "admin": {
-      "name": "Admin Strator",
-      "email": "admin@rockscompany.com",
-      "profilePicture": "https://cdn.staffsync.com/images/admin-new.jpg"
-    }
-  }
-}
-```
-
----
-
-### 6.3 Update Company Information
+### 6.2 Update Company Information
 
 **`PUT /settings/company`**
 
@@ -1133,6 +1135,7 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
 ```json
 {
   "name": "Rocks Company Ltd",
+  "description": "Corporate Headquarters",
   "email": "contact@rockscompany.com",
   "phoneNumber": "+1 312 908 1234",
   "address": "123 Avenue block, Chicago, IL"
@@ -1148,6 +1151,7 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
   "data": {
     "company": {
       "name": "Rocks Company Ltd",
+      "description": "Corporate Headquarters",
       "email": "contact@rockscompany.com",
       "phoneNumber": "+1 312 908 1234",
       "address": "123 Avenue block, Chicago, IL"

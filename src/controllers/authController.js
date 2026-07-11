@@ -42,10 +42,8 @@ exports.register = async (req, res, next) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create admin
+    // Create admin (name and email are set later by admin in settings)
     const admin = await Admin.create({
-      name: 'Admin',
-      email,
       password: hashedPassword,
       role: 'admin',
     });
@@ -53,6 +51,7 @@ exports.register = async (req, res, next) => {
     // Create company
     const company = await Company.create({
       name: companyName,
+      email,
       description: description || null,
       phoneNumber: phone,
       address,
@@ -102,7 +101,16 @@ exports.login = async (req, res, next) => {
       throw new AppError('Password must be at least 6 characters', 400);
     }
 
-    const admin = await Admin.findOne({ where: { email } });
+    // Find company by email
+    const company = await Company.findOne({ where: { email } });
+
+    if (!company) {
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    // Get the admin associated with this company
+    const admin = await Admin.findByPk(company.adminId);
+
     if (!admin) {
       throw new AppError('Invalid email or password', 401);
     }
@@ -131,6 +139,14 @@ exports.login = async (req, res, next) => {
           email: admin.email,
           role: admin.role,
           profilePicture: admin.profilePicture,
+        },
+        company: {
+          id: company.id,
+          name: company.name,
+          email: company.email,
+          phoneNumber: company.phoneNumber,
+          address: company.address,
+          description: company.description,
         },
       },
     });
@@ -200,6 +216,34 @@ exports.changePassword = async (req, res, next) => {
     res.json({
       success: true,
       message: 'Password changed successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /auth/me
+ * Return the currently authenticated user's profile.
+ */
+exports.getMe = async (req, res, next) => {
+  try {
+    const company = await Company.findOne({ where: { adminId: req.user.id } });
+
+    res.json({
+      success: true,
+      data: {
+        company: company
+          ? {
+              id: company.id,
+              name: company.name,
+              description: company.description,
+              email: company.email,
+              phoneNumber: company.phoneNumber,
+              address: company.address,
+            }
+          : null,
+      },
     });
   } catch (error) {
     next(error);

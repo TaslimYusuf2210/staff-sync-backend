@@ -337,6 +337,18 @@ const options = {
           },
         },
       },
+      '/auth/me': {
+        get: {
+          tags: ['Authentication'],
+          summary: 'Get Current User',
+          description: 'Return the currently authenticated user\'s profile including company details.',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: { description: 'User profile', content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean' }, data: { type: 'object', properties: { user: { type: 'object', properties: { id: { type: 'string' }, name: { type: 'string' }, email: { type: 'string' }, role: { type: 'string' }, profilePicture: { type: 'string' }, company: { $ref: '#/components/schemas/Company' } } } } } } } } } },
+            401: { description: 'Authentication required' },
+          },
+        },
+      },
       '/auth/send-otp': {
         post: {
           tags: ['Authentication'],
@@ -700,18 +712,9 @@ const options = {
         get: {
           tags: ['Settings'],
           summary: 'Get Settings',
-          description: 'Get admin profile and company information.',
+          description: 'Get company information.',
           security: [{ bearerAuth: [] }],
           responses: { 200: { description: 'Settings data' } },
-        },
-      },
-      '/settings/admin': {
-        put: {
-          tags: ['Settings'],
-          summary: 'Update Admin Profile',
-          security: [{ bearerAuth: [] }],
-          requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string' }, email: { type: 'string' }, profilePicture: { type: 'string' } } } } } },
-          responses: { 200: { description: 'Admin profile updated' } },
         },
       },
       '/settings/company': {
@@ -719,7 +722,7 @@ const options = {
           tags: ['Settings'],
           summary: 'Update Company Information',
           security: [{ bearerAuth: [] }],
-          requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string' }, email: { type: 'string' }, phoneNumber: { type: 'string' }, address: { type: 'string' } } } } } },
+          requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string' }, description: { type: 'string' }, email: { type: 'string' }, phoneNumber: { type: 'string' }, address: { type: 'string' } } } } } },
           responses: { 200: { description: 'Company info updated' } },
         },
       },

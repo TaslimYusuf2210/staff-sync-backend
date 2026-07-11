@@ -7,7 +7,6 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', settingsController.getSettings);
-router.put('/admin', settingsController.updateAdmin);
 router.put('/company', settingsController.updateCompany);
 
 module.exports = router;

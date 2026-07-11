@@ -1,64 +1,25 @@
-const { Admin, Company } = require('../models');
-const AppError = require('../utils/AppError');
+const { Company } = require('../models');
 
 /**
  * GET /settings
  */
 exports.getSettings = async (req, res, next) => {
   try {
-    const admin = await Admin.findByPk(req.user.id, {
-      attributes: ['id', 'name', 'email', 'profilePicture'],
-    });
-    if (!admin) throw new AppError('Admin not found', 404);
-
     const company = await Company.findOne({ where: { adminId: req.user.id } });
 
     res.json({
       success: true,
       data: {
-        admin: {
-          name: admin.name,
-          email: admin.email,
-          profilePicture: admin.profilePicture,
-        },
         company: company
           ? {
+              id: company.id,
               name: company.name,
+              description: company.description,
               email: company.email,
               phoneNumber: company.phoneNumber,
               address: company.address,
             }
           : null,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * PUT /settings/admin
- */
-exports.updateAdmin = async (req, res, next) => {
-  try {
-    const admin = await Admin.findByPk(req.user.id);
-    if (!admin) throw new AppError('Admin not found', 404);
-
-    const { name, email, profilePicture } = req.body;
-    if (name) admin.name = name;
-    if (email) admin.email = email;
-    if (profilePicture !== undefined) admin.profilePicture = profilePicture;
-    await admin.save();
-
-    res.json({
-      success: true,
-      message: 'Admin profile updated successfully',
-      data: {
-        admin: {
-          name: admin.name,
-          email: admin.email,
-          profilePicture: admin.profilePicture,
-        },
       },
     });
   } catch (error) {
@@ -77,8 +38,9 @@ exports.updateCompany = async (req, res, next) => {
       company = await Company.create({ adminId: req.user.id });
     }
 
-    const { name, email, phoneNumber, address } = req.body;
+    const { name, description, email, phoneNumber, address } = req.body;
     if (name) company.name = name;
+    if (description) company.description = description;
     if (email) company.email = email;
     if (phoneNumber) company.phoneNumber = phoneNumber;
     if (address) company.address = address;
@@ -90,6 +52,7 @@ exports.updateCompany = async (req, res, next) => {
       data: {
         company: {
           name: company.name,
+          description: company.description,
           email: company.email,
           phoneNumber: company.phoneNumber,
           address: company.address,
