@@ -13,7 +13,7 @@ const { sendOtpEmail } = require('../utils/email');
  */
 exports.register = async (req, res, next) => {
   try {
-    const { companyName, email, description, phone, address, password, agreeTerms } = req.body;
+    const { companyName, email, description, phone, address, country, password, agreeTerms } = req.body;
 
     // Validations
     if (!companyName || companyName.length < 2) {
@@ -55,6 +55,7 @@ exports.register = async (req, res, next) => {
       description: description || null,
       phoneNumber: phone,
       address,
+      country: country || null,
       adminId: admin.id,
     });
 
@@ -80,6 +81,7 @@ exports.register = async (req, res, next) => {
           description: company.description,
           phoneNumber: company.phoneNumber,
           address: company.address,
+          country: company.country,
         },
       },
     });
@@ -238,6 +240,7 @@ exports.getMe = async (req, res, next) => {
               email: company.email,
               phoneNumber: company.phoneNumber,
               address: company.address,
+              country: company.country,
             }
           : null,
       },

@@ -92,6 +92,7 @@ Register a new organisation / admin account.
   "description": "Corporate Headquarters",
   "phone": "+234-800-000-0000",
   "address": "42 Example Street, Lagos, Nigeria",
+  "country": "Nigeria",
   "password": "securePassword123",
   "agreeTerms": true
 }
@@ -116,7 +117,8 @@ Register a new organisation / admin account.
       "name": "Rocks Company Ltd",
       "description": "Corporate Headquarters",
       "phoneNumber": "+234-800-000-0000",
-      "address": "42 Example Street, Lagos, Nigeria"
+      "address": "42 Example Street, Lagos, Nigeria",
+      "country": null
     }
   }
 }
@@ -155,7 +157,8 @@ Return the currently authenticated user's company details.
       "description": "Corporate Headquarters",
       "email": "admin@rockscompany.com",
       "phoneNumber": "08000000000",
-      "address": "42 Example Street"
+      "address": "42 Example Street",
+      "country": null
     }
   }
 }
@@ -1117,7 +1120,8 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
       "description": "Corporate Headquarters",
       "email": "contact@rockscompany.com",
       "phoneNumber": "+1 312 908 1234",
-      "address": "123 Avenue block, Chicago, IL"
+      "address": "123 Avenue block, Chicago, IL",
+      "country": "Ghana"
     }
   }
 }
@@ -1137,7 +1141,8 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
   "description": "Corporate Headquarters",
   "email": "contact@rockscompany.com",
   "phoneNumber": "+1 312 908 1234",
-  "address": "123 Avenue block, Chicago, IL"
+  "address": "123 Avenue block, Chicago, IL",
+  "country": "Ghana"
 }
 ```
 
@@ -1153,7 +1158,8 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
       "description": "Corporate Headquarters",
       "email": "contact@rockscompany.com",
       "phoneNumber": "+1 312 908 1234",
-      "address": "123 Avenue block, Chicago, IL"
+      "address": "123 Avenue block, Chicago, IL",
+      "country": "Ghana"
     }
   }
 }

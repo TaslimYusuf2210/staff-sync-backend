@@ -18,6 +18,7 @@ exports.getSettings = async (req, res, next) => {
               email: company.email,
               phoneNumber: company.phoneNumber,
               address: company.address,
+              country: company.country,
             }
           : null,
       },
@@ -38,12 +39,13 @@ exports.updateCompany = async (req, res, next) => {
       company = await Company.create({ adminId: req.user.id });
     }
 
-    const { name, description, email, phoneNumber, address } = req.body;
+    const { name, description, email, phoneNumber, address, country } = req.body;
     if (name) company.name = name;
     if (description) company.description = description;
     if (email) company.email = email;
     if (phoneNumber) company.phoneNumber = phoneNumber;
     if (address) company.address = address;
+    if (country) company.country = country;
     await company.save();
 
     res.json({
@@ -56,6 +58,7 @@ exports.updateCompany = async (req, res, next) => {
           email: company.email,
           phoneNumber: company.phoneNumber,
           address: company.address,
+          country: company.country,
         },
       },
     });

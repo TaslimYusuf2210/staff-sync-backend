@@ -28,6 +28,10 @@ const Company = sequelize.define('Company', {
     type: DataTypes.STRING,
     allowNull: true,
   },
+  country: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 module.exports = Company;
