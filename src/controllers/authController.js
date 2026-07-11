@@ -13,7 +13,7 @@ const { sendOtpEmail } = require('../utils/email');
  */
 exports.register = async (req, res, next) => {
   try {
-    const { companyName, email, description, phone, address, country, password, agreeTerms } = req.body;
+    const { companyName, email, description, phone, address, password, agreeTerms } = req.body;
 
     // Validations
     if (!companyName || companyName.length < 2) {
@@ -22,10 +22,12 @@ exports.register = async (req, res, next) => {
     if (!email) throw new AppError('Email is required', 400);
     if (!description) throw new AppError('Description is required', 400);
     if (!phone) throw new AppError('Phone number is required', 400);
-    if (!/^\d{11}$/.test(phone)) {
-      throw new AppError('Phone number must be exactly 11 digits', 400);
+    if (!/^\+234(?:70[1-9]|80[2-9]|81[0-8]|90[1-9]|91[1-356]|702[5-9])\d{7}$/.test(phone)) {
+      throw new AppError('Phone number must be a valid Nigerian number starting with +234', 400);
     }
-    if (!address) throw new AppError('Address is required', 400);
+    if (!address || typeof address !== 'object' || !address.state || !address.lga || !address.settlement || !address.street) {
+      throw new AppError('Address with state, lga, settlement, and street is required', 400);
+    }
     if (!password || password.length < 6) {
       throw new AppError('Password must be at least 6 characters', 400);
     }
@@ -55,7 +57,6 @@ exports.register = async (req, res, next) => {
       description: description || null,
       phoneNumber: phone,
       address,
-      country: country || null,
       adminId: admin.id,
     });
 
@@ -81,7 +82,6 @@ exports.register = async (req, res, next) => {
           description: company.description,
           phoneNumber: company.phoneNumber,
           address: company.address,
-          country: company.country,
         },
       },
     });
@@ -240,7 +240,6 @@ exports.getMe = async (req, res, next) => {
               email: company.email,
               phoneNumber: company.phoneNumber,
               address: company.address,
-              country: company.country,
             }
           : null,
       },

@@ -1,4 +1,5 @@
 const { Company } = require('../models');
+const AppError = require('../utils/AppError');
 
 /**
  * GET /settings
@@ -18,7 +19,6 @@ exports.getSettings = async (req, res, next) => {
               email: company.email,
               phoneNumber: company.phoneNumber,
               address: company.address,
-              country: company.country,
             }
           : null,
       },
@@ -39,13 +39,20 @@ exports.updateCompany = async (req, res, next) => {
       company = await Company.create({ adminId: req.user.id });
     }
 
-    const { name, description, email, phoneNumber, address, country } = req.body;
+    const { name, description, email, phoneNumber, address } = req.body;
+
+    if (phoneNumber && !/^\+234(?:70[1-9]|80[2-9]|81[0-8]|90[1-9]|91[1-356]|702[5-9])\d{7}$/.test(phoneNumber)) {
+      throw new AppError('Phone number must be a valid Nigerian number starting with +234', 400);
+    }
+    if (address && (typeof address !== 'object' || !address.state || !address.lga || !address.settlement || !address.street)) {
+      throw new AppError('Address must include state, lga, settlement, and street', 400);
+    }
+
     if (name) company.name = name;
     if (description) company.description = description;
     if (email) company.email = email;
     if (phoneNumber) company.phoneNumber = phoneNumber;
     if (address) company.address = address;
-    if (country) company.country = country;
     await company.save();
 
     res.json({
@@ -58,7 +65,6 @@ exports.updateCompany = async (req, res, next) => {
           email: company.email,
           phoneNumber: company.phoneNumber,
           address: company.address,
-          country: company.country,
         },
       },
     });

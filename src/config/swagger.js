@@ -721,7 +721,7 @@ const options = {
           tags: ['Settings'],
           summary: 'Update Company Information',
           security: [{ bearerAuth: [] }],
-          requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string' }, description: { type: 'string' }, email: { type: 'string' }, phoneNumber: { type: 'string' }, address: { type: 'string' }, country: { type: 'string' } } } } } },
+          requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { name: { type: 'string' }, description: { type: 'string' }, email: { type: 'string' }, phoneNumber: { type: 'string' }, address: { type: 'object', properties: { state: { type: 'string' }, lga: { type: 'string' }, settlement: { type: 'string' }, street: { type: 'string' } } } } } } } },
           responses: { 200: { description: 'Company info updated' } },
         },
       },

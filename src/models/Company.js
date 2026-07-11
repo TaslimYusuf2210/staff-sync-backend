@@ -21,14 +21,10 @@ const Company = sequelize.define('Company', {
     allowNull: true,
   },
   address: {
-    type: DataTypes.STRING,
+    type: DataTypes.JSON,
     allowNull: true,
   },
   description: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  country: {
     type: DataTypes.STRING,
     allowNull: true,
   },

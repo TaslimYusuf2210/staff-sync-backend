@@ -90,9 +90,13 @@ Register a new organisation / admin account.
   "companyName": "Rocks Company Ltd",
   "email": "admin@rockscompany.com",
   "description": "Corporate Headquarters",
-  "phone": "+234-800-000-0000",
-  "address": "42 Example Street, Lagos, Nigeria",
-  "country": "Nigeria",
+  "phone": "+2348129887896",
+  "address": {
+    "state": "FCT",
+    "lga": "Municipal",
+    "settlement": "Wuse 2",
+    "street": "42 Michael Okpara Street, House 7"
+  },
   "password": "securePassword123",
   "agreeTerms": true
 }
@@ -116,9 +120,13 @@ Register a new organisation / admin account.
       "id": "comp-1",
       "name": "Rocks Company Ltd",
       "description": "Corporate Headquarters",
-      "phoneNumber": "+234-800-000-0000",
-      "address": "42 Example Street, Lagos, Nigeria",
-      "country": null
+      "phoneNumber": "+2348129887896",
+      "address": {
+        "state": "FCT",
+        "lga": "Municipal",
+        "settlement": "Wuse 2",
+        "street": "42 Michael Okpara Street, House 7"
+      }
     }
   }
 }
@@ -130,8 +138,8 @@ Register a new organisation / admin account.
 | companyName | string | Required, min 2 characters |
 | email | string | Required, valid email format, must be unique |
 | description | string | Required, one of predefined company types |
-| phone | string | Required, must be exactly 11 digits |
-| address | string | Required, company physical address |
+| phone | string | Required, must be a valid Nigerian number starting with +234 |
+| address | object | Required, must include `state`, `lga`, `settlement`, and `street` |
 | password | string | Required, min 6 characters |
 | agreeTerms | boolean | Required, must be `true` |
 
@@ -156,9 +164,13 @@ Return the currently authenticated user's company details.
       "name": "Rocks Company Ltd",
       "description": "Corporate Headquarters",
       "email": "admin@rockscompany.com",
-      "phoneNumber": "08000000000",
-      "address": "42 Example Street",
-      "country": null
+      "phoneNumber": "+2348129887896",
+      "address": {
+        "state": "FCT",
+        "lga": "Municipal",
+        "settlement": "Wuse 2",
+        "street": "42 Michael Okpara Street, House 7"
+      }
     }
   }
 }
@@ -1119,9 +1131,13 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
       "name": "Rocks Company Ltd",
       "description": "Corporate Headquarters",
       "email": "contact@rockscompany.com",
-      "phoneNumber": "+1 312 908 1234",
-      "address": "123 Avenue block, Chicago, IL",
-      "country": "Ghana"
+      "phoneNumber": "+2348129887896",
+      "address": {
+        "state": "FCT",
+        "lga": "Municipal",
+        "settlement": "Wuse 2",
+        "street": "42 Michael Okpara Street, House 7"
+      }
     }
   }
 }
@@ -1140,9 +1156,13 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
   "name": "Rocks Company Ltd",
   "description": "Corporate Headquarters",
   "email": "contact@rockscompany.com",
-  "phoneNumber": "+1 312 908 1234",
-  "address": "123 Avenue block, Chicago, IL",
-  "country": "Ghana"
+  "phoneNumber": "+2348129887896",
+  "address": {
+    "state": "FCT",
+    "lga": "Municipal",
+    "settlement": "Wuse 2",
+    "street": "42 Michael Okpara Street, House 7"
+  }
 }
 ```
 
@@ -1157,9 +1177,13 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
       "name": "Rocks Company Ltd",
       "description": "Corporate Headquarters",
       "email": "contact@rockscompany.com",
-      "phoneNumber": "+1 312 908 1234",
-      "address": "123 Avenue block, Chicago, IL",
-      "country": "Ghana"
+      "phoneNumber": "+2348129887896",
+      "address": {
+        "state": "FCT",
+        "lga": "Municipal",
+        "settlement": "Wuse 2",
+        "street": "42 Michael Okpara Street, House 7"
+      }
     }
   }
 }
