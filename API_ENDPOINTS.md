@@ -350,7 +350,7 @@ Get a paginated, searchable, filterable, sortable list of employees.
   "data": {
     "employees": [
       {
-        "id": "emp-101",
+        "id": "EMP-26-07-001",
         "firstName": "Brooklyn",
         "lastName": "Simmons",
         "email": "brok-simms@mail.com",
@@ -360,7 +360,7 @@ Get a paginated, searchable, filterable, sortable list of employees.
         "employmentType": "Full-time",
         "status": "Active",
         "hireDate": "2024-01-10",
-        "photoUrl": "https://cdn.staffsync.com/photos/emp-101.jpg"
+        "photoUrl": "https://cdn.staffsync.com/photos/EMP-26-07-001.jpg"
       }
     ],
     "pagination": {
@@ -388,7 +388,7 @@ Get full employee profile including all nested data.
   "success": true,
   "data": {
     "employee": {
-      "id": "emp-101",
+      "id": "EMP-26-07-001",
       "firstName": "Brooklyn",
       "lastName": "Simmons",
       "email": "brok-simms@mail.com",
@@ -403,7 +403,7 @@ Get full employee profile including all nested data.
       "hireDate": "2024-01-10",
       "reportingManager": "Self",
       "status": "Active",
-      "photoUrl": "https://cdn.staffsync.com/photos/emp-101.jpg",
+      "photoUrl": "https://cdn.staffsync.com/photos/EMP-26-07-001.jpg",
       "education": [
         {
           "id": "edu-1",
@@ -488,7 +488,7 @@ Register a new employee in the system.
   "success": true,
   "message": "Employee created successfully",
   "data": {
-    "id": "emp-201",
+    "id": "EMP-26-07-002",
     "firstName": "John",
     "lastName": "Doe",
     "email": "john.doe@company.com",
@@ -539,7 +539,7 @@ Update one or more fields of an employee record. Supports partial updates.
   "hireDate": "2024-06-01",
   "reportingManager": "Brooklyn Simmons",
   "status": "Active",
-  "photoUrl": "https://cdn.staffsync.com/photos/emp-201.jpg"
+  "photoUrl": "https://cdn.staffsync.com/photos/EMP-26-07-002.jpg"
 }
 ```
 
@@ -550,7 +550,7 @@ Update one or more fields of an employee record. Supports partial updates.
   "success": true,
   "message": "Employee updated successfully",
   "data": {
-    "id": "emp-201",
+    "id": "EMP-26-07-002",
     "firstName": "Jonathan",
     "lastName": "Doe",
     "email": "jonathan.doe@company.com",
@@ -609,7 +609,7 @@ Update an employee's compensation details.
 {
   "success": true,
   "data": {
-    "id": "emp-101",
+    "id": "EMP-26-07-001",
     "salary": {
       "baseSalary": 9500,
       "bonus": 2000,
@@ -643,7 +643,7 @@ Update an employee's bank details for payroll.
 {
   "success": true,
   "data": {
-    "id": "emp-101",
+    "id": "EMP-26-07-001",
     "bankAccount": {
       "bankName": "Chase Bank",
       "accountName": "Brooklyn Simmons",
@@ -855,14 +855,14 @@ Get department details and its members.
     },
     "members": [
       {
-        "id": "emp-101",
+        "id": "EMP-26-07-001",
         "firstName": "Brooklyn",
         "lastName": "Simmons",
         "email": "brok-simms@mail.com",
         "position": "Creative Director",
         "status": "Active",
         "hireDate": "2024-01-10",
-        "photoUrl": "https://cdn.staffsync.com/photos/emp-101.jpg"
+        "photoUrl": "https://cdn.staffsync.com/photos/EMP-26-07-001.jpg"
       }
     ]
   }
@@ -990,7 +990,7 @@ Aggregated counts and metrics for the overview page.
     },
     "recentEmployees": [
       {
-        "id": "emp-201",
+        "id": "EMP-26-07-002",
         "firstName": "John",
         "lastName": "Doe",
         "department": "Development",
@@ -1234,7 +1234,7 @@ Upload employee documents, profile photos, or any attachment.
 
 ```json
 {
-  "id": "string (auto-generated, format: emp-xxx)",
+  "id": "string (auto-generated, format: EMP-YY-MM-SEQ)",
   "firstName": "string",
   "lastName": "string",
   "email": "string (unique)",
@@ -1411,7 +1411,7 @@ Upload employee documents, profile photos, or any attachment.
 
 > **Notes for the Backend Team:**
 >
-> - Employee IDs follow the format `emp-xxx`, Department IDs follow `dep-xxx`.
+> - Employee IDs follow the format `EMP-YY-MM-SEQ`, Department IDs follow `ABB-YY-MM-SEQ`.
 > - The `department` field on an employee references `Department.name` (not the ID). Consider whether to use a `departmentId` foreign key instead for better normalization.
 > - The `photoUrl` on employees can be a file upload URL or an external URL (e.g., from Unsplash).
 > - Document uploads will likely require file storage integration (S3, Cloudinary, etc.).

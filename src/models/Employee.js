@@ -1,12 +1,9 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
-const generateId = require('../utils/generateId');
-
 const Employee = sequelize.define('Employee', {
   id: {
     type: DataTypes.STRING,
     primaryKey: true,
-    defaultValue: () => generateId('emp'),
   },
   firstName: {
     type: DataTypes.STRING,

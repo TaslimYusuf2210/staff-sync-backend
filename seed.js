@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const { sequelize, testConnection } = require('./src/config/database');
 require('./src/models');
 const { Admin, Company, Department, Employee, Salary, BankAccount, Education, Note } = require('./src/models');
+const { generateDepartmentId, deriveAbbreviation, generateEmployeeId } = require('./src/utils/generateId');
 
 const seed = async () => {
   const connected = await testConnection();
@@ -38,31 +39,40 @@ const seed = async () => {
 
   // ── Departments ────────────────────────────────────────────
   const design = await Department.create({
+    id: await generateDepartmentId('Design'),
     name: 'Design',
+    abbreviation: deriveAbbreviation('Design'),
     description: 'User interface design, experience planning, and product aesthetics research.',
     head: 'Brooklyn Simmons',
   });
 
   const dev = await Department.create({
+    id: await generateDepartmentId('Development'),
     name: 'Development',
+    abbreviation: deriveAbbreviation('Development'),
     description: 'Engineering, stack architecture, DevOps.',
     head: 'Cody Fisher',
   });
 
   const hr = await Department.create({
+    id: await generateDepartmentId('HR'),
     name: 'HR',
+    abbreviation: deriveAbbreviation('HR'),
     description: 'Human resources, recruitment, and employee relations.',
     head: 'Not assigned',
   });
 
   const marketing = await Department.create({
+    id: await generateDepartmentId('Marketing'),
     name: 'Marketing',
+    abbreviation: deriveAbbreviation('Marketing'),
     description: 'Brand strategy, campaigns, and market research.',
     head: 'Not assigned',
   });
 
   // ── Employees ──────────────────────────────────────────────
   const emp1 = await Employee.create({
+    id: await generateEmployeeId(),
     firstName: 'Brooklyn',
     lastName: 'Simmons',
     email: 'brok-simms@mail.com',
@@ -81,6 +91,7 @@ const seed = async () => {
   });
 
   const emp2 = await Employee.create({
+    id: await generateEmployeeId(),
     firstName: 'Cody',
     lastName: 'Fisher',
     email: 'cody.fisher@mail.com',
@@ -94,6 +105,7 @@ const seed = async () => {
   });
 
   const emp3 = await Employee.create({
+    id: await generateEmployeeId(),
     firstName: 'John',
     lastName: 'Doe',
     email: 'john.doe@company.com',

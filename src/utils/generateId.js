@@ -85,6 +85,32 @@ const generateDepartmentId = async (name) => {
   return `${prefix}${String(nextSeq).padStart(3, '0')}`;
 };
 
+/**
+ * Generate an employee ID in the format EMP-{YY}-{MM}-{SEQ}.
+ * @returns {Promise<string>} e.g. 'EMP-26-07-001'
+ */
+const generateEmployeeId = async () => {
+  const now = new Date();
+  const yy = String(now.getFullYear()).slice(2);
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const prefix = `EMP-${yy}-${mm}-`;
+
+  const [rows] = await sequelize.query(
+    `SELECT id FROM employees WHERE id LIKE :prefix ORDER BY id DESC LIMIT 1`,
+    { replacements: { prefix: `${prefix}%` } }
+  );
+
+  let nextSeq = 1;
+  if (rows.length > 0) {
+    const lastId = rows[0].id;
+    const lastSeq = parseInt(lastId.split('-').pop(), 10);
+    nextSeq = lastSeq + 1;
+  }
+
+  return `${prefix}${String(nextSeq).padStart(3, '0')}`;
+};
+
 module.exports = generateId;
 module.exports.deriveAbbreviation = deriveAbbreviation;
 module.exports.generateDepartmentId = generateDepartmentId;
+module.exports.generateEmployeeId = generateEmployeeId;

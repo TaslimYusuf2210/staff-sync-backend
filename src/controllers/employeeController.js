@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { Employee, Department, Education, Salary, BankAccount, Document, Note } = require('../models');
 const AppError = require('../utils/AppError');
+const { generateEmployeeId } = require('../utils/generateId');
 
 // ─── Include helper ─────────────────────────────────────────
 
@@ -157,7 +158,10 @@ exports.create = async (req, res, next) => {
     const dept = await Department.findOne({ where: { name: deptName } });
     if (!dept) throw new AppError(`Department "${deptName}" not found`, 400);
 
+    const id = await generateEmployeeId();
+
     const employee = await Employee.create({
+      id,
       firstName, lastName, email, phoneNumber, gender,
       departmentId: dept.id, position, employmentType, hireDate,
       status: status || 'Active',

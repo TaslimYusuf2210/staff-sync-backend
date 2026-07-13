@@ -138,7 +138,7 @@ const options = {
         Employee: {
           type: 'object',
           properties: {
-            id: { type: 'string', example: 'emp-101' },
+            id: { type: 'string', example: 'EMP-26-07-001' },
             firstName: { type: 'string', example: 'Brooklyn' },
             lastName: { type: 'string', example: 'Simmons' },
             email: { type: 'string', example: 'brok-simms@mail.com' },
@@ -473,7 +473,7 @@ const options = {
           summary: 'Get Employee',
           description: 'Get full employee profile including all nested data.',
           security: [{ bearerAuth: [] }],
-          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'emp-101' }],
+          parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' }, example: 'EMP-26-07-001' }],
           responses: {
             200: { description: 'Employee details', content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean' }, data: { type: 'object', properties: { employee: { $ref: '#/components/schemas/EmployeeDetail' } } } } } } } },
             404: { description: 'Employee not found' },
