@@ -1,17 +1,19 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
-const generateId = require('../utils/generateId');
 
 const Department = sequelize.define('Department', {
   id: {
     type: DataTypes.STRING,
     primaryKey: true,
-    defaultValue: () => generateId('dep'),
   },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
+  },
+  abbreviation: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   description: {
     type: DataTypes.STRING,

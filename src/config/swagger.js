@@ -258,8 +258,9 @@ const options = {
         Department: {
           type: 'object',
           properties: {
-            id: { type: 'string', example: 'dep-1' },
+            id: { type: 'string', example: 'DES-26-07-001' },
             name: { type: 'string', example: 'Design' },
+            abbreviation: { type: 'string', example: 'DES' },
             description: { type: 'string', example: 'User interface design and experience planning.' },
             head: { type: 'string', example: 'Brooklyn Simmons' },
             employeeCount: { type: 'integer', example: 12 },

@@ -1,5 +1,6 @@
 const { Department, Employee } = require('../models');
 const AppError = require('../utils/AppError');
+const { generateDepartmentId, deriveAbbreviation } = require('../utils/generateId');
 
 // ─── 3.1 List Departments ───────────────────────────────────
 
@@ -26,6 +27,7 @@ exports.list = async (req, res, next) => {
         departments: result.map((d) => ({
           id: d.id,
           name: d.name,
+          abbreviation: d.abbreviation,
           description: d.description,
           head: d.head,
           employeeCount: d.employeeCount || 0,
@@ -53,7 +55,14 @@ exports.getById = async (req, res, next) => {
     res.json({
       success: true,
       data: {
-        department,
+        department: {
+          id: department.id,
+          name: department.name,
+          abbreviation: department.abbreviation,
+          description: department.description,
+          head: department.head,
+          dateCreated: department.dateCreated,
+        },
         members,
       },
     });
@@ -73,8 +82,13 @@ exports.create = async (req, res, next) => {
     const existing = await Department.findOne({ where: { name } });
     if (existing) throw new AppError('Department with this name already exists', 400);
 
+    const abbreviation = deriveAbbreviation(name);
+    const id = await generateDepartmentId(name);
+
     const department = await Department.create({
+      id,
       name,
+      abbreviation,
       description: description || null,
       head: head || 'Not assigned',
     });
@@ -84,6 +98,7 @@ exports.create = async (req, res, next) => {
       data: {
         id: department.id,
         name: department.name,
+        abbreviation: department.abbreviation,
         description: department.description,
         head: department.head,
         dateCreated: department.dateCreated,

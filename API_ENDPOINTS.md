@@ -809,16 +809,18 @@ Get all departments with employee counts.
   "data": {
     "departments": [
       {
-        "id": "dep-1",
+        "id": "DES-26-07-001",
         "name": "Design",
+        "abbreviation": "DES",
         "description": "User interface design, experience planning, and product aesthetics research.",
         "head": "Brooklyn Simmons",
         "employeeCount": 12,
         "dateCreated": "2024-01-10"
       },
       {
-        "id": "dep-2",
+        "id": "DEV-26-07-002",
         "name": "Development",
+        "abbreviation": "DEV",
         "description": "Engineering, stack architecture, DevOps.",
         "head": "Cody Fisher",
         "employeeCount": 8,
@@ -844,8 +846,9 @@ Get department details and its members.
   "success": true,
   "data": {
     "department": {
-      "id": "dep-1",
+      "id": "DES-26-07-001",
       "name": "Design",
+      "abbreviation": "DES",
       "description": "User interface design, experience planning, and product aesthetics research.",
       "head": "Brooklyn Simmons",
       "dateCreated": "2024-01-10"
@@ -888,8 +891,9 @@ Get department details and its members.
 {
   "success": true,
   "data": {
-    "id": "dep-10",
+    "id": "DEV-26-07-003",
     "name": "DevOps",
+    "abbreviation": "DEV",
     "description": "Infrastructure, CI/CD, and cloud services management.",
     "head": "John Doe",
     "dateCreated": "2025-07-01"
@@ -900,7 +904,7 @@ Get department details and its members.
 **Validation:**
 | Field | Type | Rules |
 |------------|--------|--------------------------------------------|
-| name | string | Required, unique department name |
+| name | string | Required, unique department name (abbreviation auto-generated) |
 | description| string | Optional |
 | head | string | Required, defaults to `"Not assigned"` |
 
