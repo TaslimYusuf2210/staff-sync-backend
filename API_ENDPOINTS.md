@@ -510,7 +510,7 @@ Register a new employee in the system.
 | department | string | Required, must match an existing department name |
 | position | string | Required, min 2 characters |
 | employmentType | string | Required, one of: `Full-time`, `Part-time`, `Contract`, `Intern`, `Remote` |
-| hireDate | string | Required, ISO date format (YYYY-MM-DD) |
+| hireDate | string | Optional, ISO date format (YYYY-MM-DD), defaults to today |
 | status | string | Required, one of: `Active`, `Inactive`, `Probation`, `Resigned`, `Terminated` |
 
 ---

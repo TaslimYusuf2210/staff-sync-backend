@@ -149,10 +149,17 @@ exports.create = async (req, res, next) => {
     if (!['Full-time', 'Part-time', 'Contract', 'Intern', 'Remote'].includes(employmentType)) {
       throw new AppError('Invalid employment type', 400);
     }
-    if (!hireDate) throw new AppError('Hire date is required', 400);
     if (status && !['Active', 'Inactive', 'Probation', 'OnLeave', 'Resigned', 'Terminated'].includes(status)) {
       throw new AppError('Invalid status', 400);
     }
+
+    // Check unique email
+    const existingEmail = await Employee.findOne({ where: { email } });
+    if (existingEmail) throw new AppError('An employee with this email already exists', 400);
+
+    // Check unique phone number
+    const existingPhone = await Employee.findOne({ where: { phoneNumber } });
+    if (existingPhone) throw new AppError('An employee with this phone number already exists', 400);
 
     // Resolve department
     const dept = await Department.findOne({ where: { name: deptName } });
@@ -163,7 +170,8 @@ exports.create = async (req, res, next) => {
     const employee = await Employee.create({
       id,
       firstName, lastName, email, phoneNumber, gender,
-      departmentId: dept.id, position, employmentType, hireDate,
+      departmentId: dept.id, position, employmentType,
+      hireDate: hireDate || new Date().toISOString().split('T')[0],
       status: status || 'Active',
     });
 
