@@ -1248,7 +1248,7 @@ Upload employee documents, profile photos, or any attachment.
   "employmentType": "string (Full-time | Part-time | Contract | Intern | Remote)",
   "hireDate": "string (ISO date)",
   "reportingManager": "string (optional)",
-  "status": "string (Active | Inactive | Probation | Resigned | Terminated)",
+  "status": "string (Active | Inactive | Probation | OnLeave | Resigned | Terminated)",
   "photoUrl": "string (optional, URL to image)",
   "education": "Education[]",
   "salary": "Salary",

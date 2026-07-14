@@ -56,7 +56,7 @@ const Employee = sequelize.define('Employee', {
     allowNull: true,
   },
   status: {
-    type: DataTypes.ENUM('Active', 'Inactive', 'Probation', 'Resigned', 'Terminated'),
+    type: DataTypes.ENUM('Active', 'Inactive', 'Probation', 'OnLeave', 'Resigned', 'Terminated'),
     defaultValue: 'Active',
   },
   photoUrl: {

@@ -150,7 +150,7 @@ exports.create = async (req, res, next) => {
       throw new AppError('Invalid employment type', 400);
     }
     if (!hireDate) throw new AppError('Hire date is required', 400);
-    if (status && !['Active', 'Inactive', 'Probation', 'Resigned', 'Terminated'].includes(status)) {
+    if (status && !['Active', 'Inactive', 'Probation', 'OnLeave', 'Resigned', 'Terminated'].includes(status)) {
       throw new AppError('Invalid status', 400);
     }
 

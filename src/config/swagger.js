@@ -428,7 +428,7 @@ const options = {
             { name: 'limit', in: 'query', schema: { type: 'integer', default: 10 }, description: 'Items per page' },
             { name: 'search', in: 'query', schema: { type: 'string' }, description: 'Search by name, ID, or position' },
             { name: 'department', in: 'query', schema: { type: 'string' }, description: 'Filter by department name' },
-            { name: 'status', in: 'query', schema: { type: 'string', enum: ['Active', 'Inactive', 'Probation', 'Resigned', 'Terminated'] } },
+            { name: 'status', in: 'query', schema: { type: 'string', enum: ['Active', 'Inactive', 'Probation', 'OnLeave', 'Resigned', 'Terminated'] } },
             { name: 'sortBy', in: 'query', schema: { type: 'string', enum: ['name', 'dept', 'joined'], default: 'name' } },
             { name: 'sortOrder', in: 'query', schema: { type: 'string', enum: ['asc', 'desc'], default: 'asc' } },
           ],
