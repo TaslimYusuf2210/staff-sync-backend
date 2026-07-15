@@ -6,12 +6,12 @@ const { generateEmployeeId } = require('../utils/generateId');
 // ─── Include helper ─────────────────────────────────────────
 
 const fullInclude = [
-  { model: Education, as: 'Educations' },
-  { model: Salary, as: 'Salary' },
-  { model: BankAccount, as: 'BankAccount' },
-  { model: Document, as: 'Documents' },
-  { model: Note, as: 'Notes' },
-  { model: Department, as: 'Department' },
+  { model: Education },
+  { model: Salary },
+  { model: BankAccount },
+  { model: Document },
+  { model: Note },
+  { model: Department },
 ];
 
 const basicAttributes = [
