@@ -1,6 +1,11 @@
 /**
- * Seed script — populates the database with initial data.
- * Run: node seed.js
+ * Seed script — populates the database with initial sample data.
+ *
+ * SAFE by default — will NOT drop existing data unless you pass --force.
+ *
+ * Usage:
+ *   node seed.js          # seed only if database is empty
+ *   node seed.js --force  # DROP all data and re-seed (⚠️ destructive)
  */
 const bcrypt = require('bcryptjs');
 const { sequelize, testConnection } = require('./src/config/database');
@@ -15,8 +20,27 @@ const seed = async () => {
     process.exit(1);
   }
 
-  await sequelize.sync({ force: true });
-  console.log('✅ Tables recreated');
+  const forceMode = process.argv.includes('--force');
+
+  // Check if data already exists
+  const adminCount = await Admin.count();
+  const hasData = adminCount > 0;
+
+  if (hasData && !forceMode) {
+    console.log('⚠️  Database already contains data. Skipping seed.');
+    console.log('   To re-seed from scratch, run: node seed.js --force');
+    console.log('   (This will DROP all existing data!)');
+    process.exit(0);
+  }
+
+  if (forceMode) {
+    console.log('⚠️  WARNING: --force mode enabled. Dropping all tables...');
+    await sequelize.sync({ force: true });
+    console.log('✅ Tables recreated');
+  } else {
+    await sequelize.sync();
+    console.log('✅ Tables synced (existing data preserved)');
+  }
 
   // ── Admin ──────────────────────────────────────────────────
   const admin = await Admin.create({
