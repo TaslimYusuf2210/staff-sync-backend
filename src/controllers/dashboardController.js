@@ -7,21 +7,24 @@ const { Employee, Department } = require('../models');
  */
 exports.getStats = async (req, res, next) => {
   try {
-    const totalEmployees = await Employee.count();
-    const activeEmployees = await Employee.count({ where: { status: 'Active' } });
-    const inactiveEmployees = await Employee.count({ where: { status: { [Op.ne]: 'Active' } } });
-    const totalDepartments = await Department.count();
+    const companyId = req.user.companyId;
+
+    const totalEmployees = await Employee.count({ where: { companyId } });
+    const activeEmployees = await Employee.count({ where: { status: 'Active', companyId } });
+    const inactiveEmployees = await Employee.count({ where: { status: { [Op.ne]: 'Active' }, companyId } });
+    const totalDepartments = await Department.count({ where: { companyId } });
 
     // New employees this month
     const startOfMonth = new Date();
     startOfMonth.setDate(1);
     startOfMonth.setHours(0, 0, 0, 0);
     const newEmployeesThisMonth = await Employee.count({
-      where: { hireDate: { [Op.gte]: startOfMonth.toISOString().split('T')[0] } },
+      where: { hireDate: { [Op.gte]: startOfMonth.toISOString().split('T')[0] }, companyId },
     });
 
     // Employees by department
     const departments = await Department.findAll({
+      where: { companyId },
       include: [{ model: Employee, as: 'Employees', attributes: [] }],
       attributes: ['name', [fn('COUNT', col('Employees.id')), 'count']],
       group: ['Department.id'],
@@ -38,7 +41,7 @@ exports.getStats = async (req, res, next) => {
     // Status distribution
     const statuses = ['Active', 'Inactive', 'Probation', 'Resigned', 'Terminated'];
     const statusCounts = await Promise.all(
-      statuses.map((s) => Employee.count({ where: { status: s } }))
+      statuses.map((s) => Employee.count({ where: { status: s, companyId } }))
     );
     const statusDistribution = {};
     statuses.forEach((s, i) => {
@@ -47,6 +50,7 @@ exports.getStats = async (req, res, next) => {
 
     // Recent employees (last 5)
     const recentEmployees = await Employee.findAll({
+      where: { companyId },
       order: [['createdAt', 'DESC']],
       limit: 5,
       attributes: ['id', 'firstName', 'lastName', 'position', 'hireDate', 'photoUrl'],

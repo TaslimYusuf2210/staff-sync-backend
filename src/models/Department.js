@@ -9,7 +9,6 @@ const Department = sequelize.define('Department', {
   name: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true,
   },
   abbreviation: {
     type: DataTypes.STRING,
@@ -27,6 +26,10 @@ const Department = sequelize.define('Department', {
   dateCreated: {
     type: DataTypes.DATEONLY,
     defaultValue: () => new Date().toISOString().split('T')[0],
+  },
+  companyId: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
 });
 

@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const AppError = require('../utils/AppError');
-const { Admin } = require('../models');
+const { Admin, Company } = require('../models');
 
 /**
  * JWT authentication middleware.
- * Verifies the Bearer token and attaches the admin user to req.user.
+ * Verifies the Bearer token and attaches the admin user and company to req.user.
  */
 const authenticate = async (req, _res, next) => {
   try {
@@ -22,7 +22,11 @@ const authenticate = async (req, _res, next) => {
       throw new AppError('Admin not found', 401);
     }
 
+    // Fetch the company associated with this admin
+    const company = await Company.findOne({ where: { adminId: admin.id } });
+
     req.user = admin;
+    req.user.companyId = company?.id || null;
     next();
   } catch (error) {
     if (error instanceof AppError) {

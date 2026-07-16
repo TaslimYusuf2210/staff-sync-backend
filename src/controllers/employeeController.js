@@ -30,7 +30,7 @@ exports.list = async (req, res, next) => {
     const { search, department, status, sortBy, sortOrder } = req.query;
 
     // Build where clause
-    const where = {};
+    const where = { companyId: req.user.companyId };
     if (search) {
       where[Op.or] = [
         { firstName: { [Op.like]: `%${search}%` } },
@@ -43,7 +43,7 @@ exports.list = async (req, res, next) => {
 
     // Handle department filter (by name)
     if (department) {
-      const dept = await Department.findOne({ where: { name: department } });
+      const dept = await Department.findOne({ where: { name: department, companyId: req.user.companyId } });
       if (dept) where.departmentId = dept.id;
       else {
         return res.json({
@@ -102,7 +102,8 @@ exports.list = async (req, res, next) => {
 
 exports.getById = async (req, res, next) => {
   try {
-    const employee = await Employee.findByPk(req.params.id, {
+    const employee = await Employee.findOne({
+      where: { id: req.params.id, companyId: req.user.companyId },
       include: fullInclude,
     });
 
@@ -162,7 +163,7 @@ exports.create = async (req, res, next) => {
     if (existingPhone) throw new AppError('An employee with this phone number already exists', 400);
 
     // Resolve department
-    const dept = await Department.findOne({ where: { name: deptName } });
+    const dept = await Department.findOne({ where: { name: deptName, companyId: req.user.companyId } });
     if (!dept) throw new AppError(`Department "${deptName}" not found`, 400);
 
     const id = await generateEmployeeId();
@@ -173,6 +174,7 @@ exports.create = async (req, res, next) => {
       departmentId: dept.id, position, employmentType,
       hireDate: hireDate || new Date().toISOString().split('T')[0],
       status: status || 'Active',
+      companyId: req.user.companyId,
     });
 
     res.status(201).json({
@@ -197,7 +199,7 @@ exports.create = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
   try {
-    const employee = await Employee.findByPk(req.params.id);
+    const employee = await Employee.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!employee) throw new AppError('Employee not found', 404);
 
     const updatableFields = [
@@ -215,7 +217,7 @@ exports.update = async (req, res, next) => {
 
     // Handle department update
     if (req.body.department) {
-      const dept = await Department.findOne({ where: { name: req.body.department } });
+      const dept = await Department.findOne({ where: { name: req.body.department, companyId: req.user.companyId } });
       if (!dept) throw new AppError(`Department "${req.body.department}" not found`, 400);
       updates.departmentId = dept.id;
     }
@@ -246,7 +248,7 @@ exports.update = async (req, res, next) => {
 
 exports.remove = async (req, res, next) => {
   try {
-    const employee = await Employee.findByPk(req.params.id);
+    const employee = await Employee.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!employee) throw new AppError('Employee not found', 404);
 
     await employee.destroy();
@@ -264,7 +266,7 @@ exports.remove = async (req, res, next) => {
 
 exports.updateSalary = async (req, res, next) => {
   try {
-    const employee = await Employee.findByPk(req.params.id);
+    const employee = await Employee.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!employee) throw new AppError('Employee not found', 404);
 
     const { baseSalary, bonus, allowances } = req.body;
@@ -298,7 +300,7 @@ exports.updateSalary = async (req, res, next) => {
 
 exports.updateBank = async (req, res, next) => {
   try {
-    const employee = await Employee.findByPk(req.params.id);
+    const employee = await Employee.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!employee) throw new AppError('Employee not found', 404);
 
     const { bankName, accountName, accountNumber } = req.body;
@@ -332,7 +334,7 @@ exports.updateBank = async (req, res, next) => {
 
 exports.addEducation = async (req, res, next) => {
   try {
-    const employee = await Employee.findByPk(req.params.id);
+    const employee = await Employee.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!employee) throw new AppError('Employee not found', 404);
 
     const { institutionName, degree, qualification, fieldOfStudy, graduationYear } = req.body;
@@ -382,7 +384,7 @@ exports.deleteEducation = async (req, res, next) => {
 
 exports.addDocument = async (req, res, next) => {
   try {
-    const employee = await Employee.findByPk(req.params.id);
+    const employee = await Employee.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!employee) throw new AppError('Employee not found', 404);
 
     if (!req.file) throw new AppError('File is required', 400);
@@ -439,7 +441,7 @@ exports.deleteDocument = async (req, res, next) => {
 
 exports.addNote = async (req, res, next) => {
   try {
-    const employee = await Employee.findByPk(req.params.id);
+    const employee = await Employee.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!employee) throw new AppError('Employee not found', 404);
 
     const { text } = req.body;

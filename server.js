@@ -9,10 +9,10 @@ const start = async () => {
   const dbConnected = await testConnection();
 
   if (dbConnected) {
-    // Sync models with database.
-    // - Production: only creates missing tables, never alters (safe).
-    // - Development: uses alter to add new columns, but won't drop data.
-    await sequelize.sync({ alter: config.isDev });
+    // Sync models with database (creates missing tables, won't drop data).
+    // Note: alter is disabled — schema changes are handled manually to avoid
+    // foreign key constraint conflicts during development.
+    await sequelize.sync();
     console.log('✅ Database tables synced');
   }
 

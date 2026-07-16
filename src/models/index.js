@@ -14,6 +14,14 @@ const Note = require('./Note');
 Admin.hasOne(Company, { foreignKey: 'adminId' });
 Company.belongsTo(Admin, { foreignKey: 'adminId' });
 
+// Company ↔ Department (one-to-many)
+Company.hasMany(Department, { foreignKey: 'companyId', onDelete: 'CASCADE' });
+Department.belongsTo(Company, { foreignKey: 'companyId' });
+
+// Company ↔ Employee (one-to-many)
+Company.hasMany(Employee, { foreignKey: 'companyId', onDelete: 'CASCADE' });
+Employee.belongsTo(Company, { foreignKey: 'companyId' });
+
 // Department ↔ Employee (one-to-many)
 Department.hasMany(Employee, { foreignKey: 'departmentId' });
 Employee.belongsTo(Department, { foreignKey: 'departmentId' });

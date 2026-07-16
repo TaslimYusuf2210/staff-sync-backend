@@ -6,12 +6,15 @@ const { Employee, Department, Salary } = require('../models');
  */
 exports.employeeSummary = async (req, res, next) => {
   try {
-    const totalEmployees = await Employee.count();
-    const activeEmployees = await Employee.count({ where: { status: 'Active' } });
-    const inactiveEmployees = await Employee.count({ where: { status: { [Op.ne]: 'Active' } } });
-    const totalDepartments = await Department.count();
+    const companyId = req.user.companyId;
+
+    const totalEmployees = await Employee.count({ where: { companyId } });
+    const activeEmployees = await Employee.count({ where: { status: 'Active', companyId } });
+    const inactiveEmployees = await Employee.count({ where: { status: { [Op.ne]: 'Active' }, companyId } });
+    const totalDepartments = await Department.count({ where: { companyId } });
 
     const departments = await Department.findAll({
+      where: { companyId },
       include: [{ model: Employee, as: 'Employees', attributes: [] }],
       attributes: ['name', [fn('COUNT', col('Employees.id')), 'count']],
       group: ['Department.id'],
@@ -46,7 +49,12 @@ exports.employeeSummary = async (req, res, next) => {
 exports.salarySummary = async (req, res, next) => {
   try {
     const salaries = await Salary.findAll({
-      include: [{ model: Employee, as: 'Employee', include: [{ model: Department, as: 'Department', attributes: ['name'] }] }],
+      include: [{
+        model: Employee,
+        as: 'Employee',
+        where: { companyId: req.user.companyId },
+        include: [{ model: Department, as: 'Department', attributes: ['name'] }],
+      }],
     });
 
     let totalMonthlyPayroll = 0;

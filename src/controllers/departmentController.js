@@ -7,6 +7,7 @@ const { generateDepartmentId, deriveAbbreviation } = require('../utils/generateI
 exports.list = async (req, res, next) => {
   try {
     const departments = await Department.findAll({
+      where: { companyId: req.user.companyId },
       include: [{ model: Employee, as: 'Employees', attributes: [] }],
       attributes: {
         include: [
@@ -19,7 +20,7 @@ exports.list = async (req, res, next) => {
     });
 
     // If no departments, return empty
-    const result = departments.length > 0 ? departments : await Department.findAll();
+    const result = departments.length > 0 ? departments : await Department.findAll({ where: { companyId: req.user.companyId } });
 
     res.json({
       success: true,
@@ -44,11 +45,11 @@ exports.list = async (req, res, next) => {
 
 exports.getById = async (req, res, next) => {
   try {
-    const department = await Department.findByPk(req.params.id);
+    const department = await Department.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!department) throw new AppError('Department not found', 404);
 
     const members = await Employee.findAll({
-      where: { departmentId: department.id },
+      where: { departmentId: department.id, companyId: req.user.companyId },
       attributes: ['id', 'firstName', 'lastName', 'email', 'position', 'status', 'hireDate', 'photoUrl'],
     });
 
@@ -79,7 +80,7 @@ exports.create = async (req, res, next) => {
 
     if (!name) throw new AppError('Department name is required', 400);
 
-    const existing = await Department.findOne({ where: { name } });
+    const existing = await Department.findOne({ where: { name, companyId: req.user.companyId } });
     if (existing) throw new AppError('Department with this name already exists', 400);
 
     const abbreviation = deriveAbbreviation(name);
@@ -91,6 +92,7 @@ exports.create = async (req, res, next) => {
       abbreviation,
       description: description || null,
       head: head || 'Not assigned',
+      companyId: req.user.companyId,
     });
 
     res.status(201).json({
@@ -113,7 +115,7 @@ exports.create = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
   try {
-    const department = await Department.findByPk(req.params.id);
+    const department = await Department.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!department) throw new AppError('Department not found', 404);
 
     const updatableFields = ['name', 'description', 'head'];
@@ -125,7 +127,7 @@ exports.update = async (req, res, next) => {
     }
 
     if (updates.name) {
-      const existing = await Department.findOne({ where: { name: updates.name } });
+      const existing = await Department.findOne({ where: { name: updates.name, companyId: req.user.companyId } });
       if (existing && existing.id !== department.id) {
         throw new AppError('Department with this name already exists', 400);
       }
@@ -146,7 +148,7 @@ exports.update = async (req, res, next) => {
 
 exports.remove = async (req, res, next) => {
   try {
-    const department = await Department.findByPk(req.params.id);
+    const department = await Department.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!department) throw new AppError('Department not found', 404);
 
     // Check if employees are assigned
