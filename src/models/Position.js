@@ -20,22 +20,16 @@ const Position = sequelize.define('Position', {
     type: DataTypes.STRING,
     allowNull: true,
   },
-  createdAt: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-  },
 }, {
   indexes: [
     {
       unique: true,
       name: 'unique_title_per_department',
-      fields: ['departmentId', 'title'],
+      fields: ['department_id', 'title'],
     },
   ],
+  // Match global config: store camelCase attributes as snake_case in MySQL
+  underscored: true,
 });
 
 module.exports = Position;
