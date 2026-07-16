@@ -2,6 +2,7 @@ const Admin = require('./Admin');
 const Company = require('./Company');
 const Employee = require('./Employee');
 const Department = require('./Department');
+const Position = require('./Position');
 const Education = require('./Education');
 const Salary = require('./Salary');
 const BankAccount = require('./BankAccount');
@@ -26,6 +27,14 @@ Employee.belongsTo(Company, { foreignKey: 'companyId' });
 Department.hasMany(Employee, { foreignKey: 'departmentId' });
 Employee.belongsTo(Department, { foreignKey: 'departmentId' });
 
+// Department ↔ Position (one-to-many, cascade delete)
+Department.hasMany(Position, { foreignKey: 'departmentId', onDelete: 'CASCADE' });
+Position.belongsTo(Department, { foreignKey: 'departmentId' });
+
+// Position ↔ Employee (one-to-many)
+Position.hasMany(Employee, { foreignKey: 'position' });
+Employee.belongsTo(Position, { foreignKey: 'position' });
+
 // Employee → sub-resources (one-to-many / one-to-one)
 Employee.hasMany(Education, { foreignKey: 'employeeId', onDelete: 'CASCADE' });
 Education.belongsTo(Employee, { foreignKey: 'employeeId' });
@@ -47,6 +56,7 @@ module.exports = {
   Company,
   Employee,
   Department,
+  Position,
   Education,
   Salary,
   BankAccount,

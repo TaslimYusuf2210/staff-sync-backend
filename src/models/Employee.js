@@ -42,6 +42,10 @@ const Employee = sequelize.define('Employee', {
   position: {
     type: DataTypes.STRING,
     allowNull: false,
+    references: {
+      model: 'Positions',
+      key: 'id',
+    },
   },
   employmentType: {
     type: DataTypes.ENUM('Full-time', 'Part-time', 'Contract', 'Intern', 'Remote'),

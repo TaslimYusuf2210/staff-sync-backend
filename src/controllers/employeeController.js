@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Employee, Department, Education, Salary, BankAccount, Document, Note } = require('../models');
+const { Employee, Department, Position, Education, Salary, BankAccount, Document, Note } = require('../models');
 const AppError = require('../utils/AppError');
 const { generateEmployeeId } = require('../utils/generateId');
 
@@ -12,6 +12,7 @@ const fullInclude = [
   { model: Document },
   { model: Note },
   { model: Department },
+  { model: Position, attributes: ['id', 'title'] },
 ];
 
 const basicAttributes = [
@@ -32,12 +33,22 @@ exports.list = async (req, res, next) => {
     // Build where clause
     const where = { companyId: req.user.companyId };
     if (search) {
+      // Find position IDs matching the search term for position title search
+      const matchingPositions = await Position.findAll({
+        where: { title: { [Op.like]: `%${search}%` } },
+        attributes: ['id'],
+      });
+      const positionIds = matchingPositions.map((p) => p.id);
+
       where[Op.or] = [
         { firstName: { [Op.like]: `%${search}%` } },
         { lastName: { [Op.like]: `%${search}%` } },
         { id: { [Op.like]: `%${search}%` } },
-        { position: { [Op.like]: `%${search}%` } },
       ];
+
+      if (positionIds.length > 0) {
+        where[Op.or].push({ position: { [Op.in]: positionIds } });
+      }
     }
     if (status) where.status = status;
 
@@ -67,7 +78,10 @@ exports.list = async (req, res, next) => {
     const { count, rows } = await Employee.findAndCountAll({
       where,
       attributes: basicAttributes,
-      include: [{ model: Department, as: 'Department', attributes: ['name'] }],
+      include: [
+        { model: Department, as: 'Department', attributes: ['name'] },
+        { model: Position, as: 'Position', attributes: ['id', 'title'] },
+      ],
       order,
       limit,
       offset,
@@ -76,7 +90,9 @@ exports.list = async (req, res, next) => {
     const employees = rows.map((emp) => {
       const e = emp.toJSON();
       e.department = e.Department?.name || null;
+      e.position = e.Position?.title || e.position || null;
       delete e.Department;
+      delete e.Position;
       delete e.departmentId;
       return e;
     });
@@ -117,6 +133,12 @@ exports.getById = async (req, res, next) => {
       result.department = result.Department.name;
       delete result.Department;
     }
+    // Flatten position title
+    if (result.Position) {
+      result.position = result.Position.title;
+      result.positionId = result.Position.id;
+      delete result.Position;
+    }
     delete result.departmentId;
 
     res.json({
@@ -134,7 +156,7 @@ exports.create = async (req, res, next) => {
   try {
     const {
       firstName, lastName, email, phoneNumber, gender,
-      department: deptName, position, employmentType, hireDate, status,
+      department: deptName, positionId, employmentType, hireDate, status,
     } = req.body;
 
     // Validate required fields
@@ -145,7 +167,7 @@ exports.create = async (req, res, next) => {
     if (!gender) throw new AppError('Gender is required', 400);
     if (!['Male', 'Female', 'Other'].includes(gender)) throw new AppError('Gender must be Male, Female, or Other', 400);
     if (!deptName) throw new AppError('Department is required', 400);
-    if (!position || position.length < 2) throw new AppError('Position must be at least 2 characters', 400);
+    if (!positionId) throw new AppError('Position is required', 400);
     if (!employmentType) throw new AppError('Employment type is required', 400);
     if (!['Full-time', 'Part-time', 'Contract', 'Intern', 'Remote'].includes(employmentType)) {
       throw new AppError('Invalid employment type', 400);
@@ -166,12 +188,20 @@ exports.create = async (req, res, next) => {
     const dept = await Department.findOne({ where: { name: deptName, companyId: req.user.companyId } });
     if (!dept) throw new AppError(`Department "${deptName}" not found`, 400);
 
+    // Validate position exists in the selected department
+    const position = await Position.findOne({
+      where: { id: positionId, departmentId: dept.id },
+    });
+    if (!position) {
+      throw new AppError('Selected position does not exist in this department', 400);
+    }
+
     const id = await generateEmployeeId();
 
     const employee = await Employee.create({
       id,
       firstName, lastName, email, phoneNumber, gender,
-      departmentId: dept.id, position, employmentType,
+      departmentId: dept.id, position: position.id, employmentType,
       hireDate: hireDate || new Date().toISOString().split('T')[0],
       status: status || 'Active',
       companyId: req.user.companyId,
@@ -186,7 +216,7 @@ exports.create = async (req, res, next) => {
         lastName: employee.lastName,
         email: employee.email,
         department: deptName,
-        position: employee.position,
+        position: position.title,
         status: employee.status,
       },
     });
@@ -204,7 +234,7 @@ exports.update = async (req, res, next) => {
 
     const updatableFields = [
       'firstName', 'lastName', 'email', 'phoneNumber', 'gender',
-      'dob', 'address', 'emergencyContact', 'position',
+      'dob', 'address', 'emergencyContact',
       'employmentType', 'hireDate', 'reportingManager', 'status', 'photoUrl',
     ];
 
@@ -215,23 +245,58 @@ exports.update = async (req, res, next) => {
       }
     }
 
-    // Handle department update
+    // Handle department update — if department changes, reset position
     if (req.body.department) {
       const dept = await Department.findOne({ where: { name: req.body.department, companyId: req.user.companyId } });
       if (!dept) throw new AppError(`Department "${req.body.department}" not found`, 400);
+
+      const departmentChanged = dept.id !== employee.departmentId;
       updates.departmentId = dept.id;
+
+      if (departmentChanged) {
+        // Position must be re-specified when department changes
+        if (!req.body.positionId) {
+          throw new AppError(
+            'Department changed — position must be re-specified for the new department',
+            400
+          );
+        }
+        // Validate new position belongs to the new department
+        const newPosition = await Position.findOne({
+          where: { id: req.body.positionId, departmentId: dept.id },
+        });
+        if (!newPosition) {
+          throw new AppError('Selected position does not exist in the new department', 400);
+        }
+        updates.position = newPosition.id;
+      }
+    } else if (req.body.positionId !== undefined) {
+      // Position update without department change — validate position belongs to current department
+      const currentDeptId = employee.departmentId;
+      const position = await Position.findOne({
+        where: { id: req.body.positionId, departmentId: currentDeptId },
+      });
+      if (!position) {
+        throw new AppError('Selected position does not exist in this department', 400);
+      }
+      updates.position = position.id;
     }
 
     await employee.update(updates);
 
-    // Re-fetch with department name
+    // Re-fetch with department name and position title
     const updated = await Employee.findByPk(req.params.id, {
-      include: [{ model: Department, as: 'Department', attributes: ['name'] }],
+      include: [
+        { model: Department, as: 'Department', attributes: ['name'] },
+        { model: Position, as: 'Position', attributes: ['id', 'title'] },
+      ],
     });
 
     const result = updated.toJSON();
     result.department = result.Department?.name || null;
+    result.position = result.Position?.title || null;
     delete result.Department;
+    delete result.Position;
     delete result.departmentId;
 
     res.json({

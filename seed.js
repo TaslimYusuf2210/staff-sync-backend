@@ -12,7 +12,7 @@
 const bcrypt = require('bcryptjs');
 const { sequelize, testConnection } = require('./src/config/database');
 require('./src/models');
-const { Admin, Company, Department, Employee, Salary, BankAccount, Education, Note } = require('./src/models');
+const { Admin, Company, Department, Position, Employee, Salary, BankAccount, Education, Note } = require('./src/models');
 const { generateDepartmentId, deriveAbbreviation, generateEmployeeId } = require('./src/utils/generateId');
 const readline = require('readline');
 
@@ -123,6 +123,47 @@ const seed = async () => {
     head: 'Not assigned',
   });
 
+  // ── Positions ──────────────────────────────────────────────
+  const creativeDirector = await Position.create({
+    id: require('uuid').v4(),
+    departmentId: design.id,
+    title: 'Creative Director',
+    description: 'Leads creative vision and design strategy',
+  });
+  const uxDesigner = await Position.create({
+    id: require('uuid').v4(),
+    departmentId: design.id,
+    title: 'UX Designer',
+    description: 'User experience research and prototyping',
+  });
+
+  const leadDeveloper = await Position.create({
+    id: require('uuid').v4(),
+    departmentId: dev.id,
+    title: 'Lead Developer',
+    description: 'Technical lead and architecture decisions',
+  });
+  const softwareEngineer = await Position.create({
+    id: require('uuid').v4(),
+    departmentId: dev.id,
+    title: 'Software Engineer',
+    description: 'Full-stack software development',
+  });
+
+  const hrManager = await Position.create({
+    id: require('uuid').v4(),
+    departmentId: hr.id,
+    title: 'HR Manager',
+    description: 'Human resources and recruitment management',
+  });
+
+  const marketingSpecialist = await Position.create({
+    id: require('uuid').v4(),
+    departmentId: marketing.id,
+    title: 'Marketing Specialist',
+    description: 'Brand strategy and campaign execution',
+  });
+
   // ── Employees ──────────────────────────────────────────────
   const emp1 = await Employee.create({
     id: await generateEmployeeId(),
@@ -135,7 +176,7 @@ const seed = async () => {
     address: '123 Avenue block, Chicago, IL',
     emergencyContact: 'Mark Simmons (+1 312 908 4321)',
     departmentId: design.id,
-    position: 'Creative Director',
+    position: creativeDirector.id,
     employmentType: 'Full-time',
     hireDate: '2024-01-10',
     reportingManager: 'Self',
@@ -151,7 +192,7 @@ const seed = async () => {
     phoneNumber: '+1 312 908 5678',
     gender: 'Male',
     departmentId: dev.id,
-    position: 'Lead Developer',
+    position: leadDeveloper.id,
     employmentType: 'Full-time',
     hireDate: '2024-01-12',
     status: 'Active',
@@ -165,7 +206,7 @@ const seed = async () => {
     phoneNumber: '+1 555 123 4567',
     gender: 'Male',
     departmentId: dev.id,
-    position: 'Software Engineer',
+    position: softwareEngineer.id,
     employmentType: 'Full-time',
     hireDate: '2025-07-01',
     status: 'Active',
@@ -203,7 +244,7 @@ const seed = async () => {
   console.log('\n📋 Login credentials:');
   console.log('   Email:    admin@rockscompany.com');
   console.log('   Password: securePassword123');
-  console.log('\n📊 Seeded data: 4 departments, 3 employees, plus salaries, bank, education, notes.\n');
+  console.log('\n📊 Seeded data: 4 departments, 6 positions, 3 employees, plus salaries, bank, education, notes.\n');
 
   process.exit(0);
 };

@@ -1,4 +1,4 @@
-const { Department, Employee } = require('../models');
+const { Department, Employee, Position } = require('../models');
 const AppError = require('../utils/AppError');
 const { generateDepartmentId, deriveAbbreviation } = require('../utils/generateId');
 
@@ -51,6 +51,14 @@ exports.getById = async (req, res, next) => {
     const members = await Employee.findAll({
       where: { departmentId: department.id, companyId: req.user.companyId },
       attributes: ['id', 'firstName', 'lastName', 'email', 'position', 'status', 'hireDate', 'photoUrl'],
+      include: [{ model: Position, as: 'Position', attributes: ['title'] }],
+    });
+
+    const membersWithPosition = members.map((m) => {
+      const json = m.toJSON();
+      json.position = json.Position?.title || json.position;
+      delete json.Position;
+      return json;
     });
 
     res.json({
@@ -64,7 +72,7 @@ exports.getById = async (req, res, next) => {
           head: department.head,
           dateCreated: department.dateCreated,
         },
-        members,
+        members: membersWithPosition,
       },
     });
   } catch (error) {

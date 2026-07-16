@@ -12,11 +12,12 @@
 1. [Authentication](#1-authentication)
 2. [Employees](#2-employees)
 3. [Departments](#3-departments)
-4. [Dashboard](#4-dashboard)
-5. [Reports](#5-reports)
-6. [Settings](#6-settings)
-7. [File Uploads](#7-file-uploads)
-8. [Data Models](#8-data-models)
+4. [Department Positions](#4-department-positions)
+5. [Dashboard](#5-dashboard)
+6. [Reports](#6-reports)
+7. [Settings](#7-settings)
+8. [File Uploads](#8-file-uploads)
+9. [Data Models](#9-data-models)
 
 ---
 
@@ -474,7 +475,7 @@ Register a new employee in the system.
   "phoneNumber": "+1 555 123 4567",
   "gender": "Male",
   "department": "Development",
-  "position": "Software Engineer",
+  "positionId": "uuid-of-software-engineer-position",
   "employmentType": "Full-time",
   "hireDate": "2025-07-01",
   "status": "Active"
@@ -508,7 +509,7 @@ Register a new employee in the system.
 | phoneNumber | string | Required, min 6 characters |
 | gender | string | Required, one of: `Male`, `Female`, `Other` |
 | department | string | Required, must match an existing department name |
-| position | string | Required, min 2 characters |
+| positionId | string | Required, must be a valid Position ID belonging to the selected department |
 | employmentType | string | Required, one of: `Full-time`, `Part-time`, `Contract`, `Intern`, `Remote` |
 | hireDate | string | Optional, ISO date format (YYYY-MM-DD), defaults to today |
 | status | string | Required, one of: `Active`, `Inactive`, `Probation`, `Resigned`, `Terminated` |
@@ -534,7 +535,7 @@ Update one or more fields of an employee record. Supports partial updates.
   "address": "456 Oak St, New York, NY",
   "emergencyContact": "Jane Doe (+1 555 987 6542)",
   "department": "Design",
-  "position": "Senior UX Designer",
+  "positionId": "uuid-of-senior-ux-designer-position",
   "employmentType": "Full-time",
   "hireDate": "2024-06-01",
   "reportingManager": "Brooklyn Simmons",
@@ -542,6 +543,8 @@ Update one or more fields of an employee record. Supports partial updates.
   "photoUrl": "https://cdn.staffsync.com/photos/EMP-26-07-002.jpg"
 }
 ```
+
+> **Note:** If `department` is changed, `positionId` **must** also be provided — the position will be reset to match the new department's available positions.
 
 **Success Response (200):**
 
@@ -950,9 +953,175 @@ Get department details and its members.
 
 ---
 
-## 4. Dashboard
+### 3.6 List Department Positions
 
-### 4.1 Get Dashboard Statistics
+Get all positions belonging to a department. Used to populate the position dropdown in employee creation/editing.
+
+**`GET /departments/:departmentId/positions`**
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "positions": [
+      {
+        "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "title": "Software Engineer",
+        "description": "Full-stack software development",
+        "createdAt": "2025-07-01T08:00:00.000Z",
+        "updatedAt": "2025-07-01T08:00:00.000Z"
+      },
+      {
+        "id": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+        "title": "Lead Developer",
+        "description": "Technical lead and architecture decisions",
+        "createdAt": "2025-07-01T08:00:00.000Z",
+        "updatedAt": "2025-07-01T08:00:00.000Z"
+      }
+    ]
+  }
+}
+```
+
+---
+
+### 3.7 Create Position
+
+**`POST /departments/:departmentId/positions`**
+
+**Request Body:**
+
+```json
+{
+  "title": "Software Engineer",
+  "description": "Full-stack software development"
+}
+```
+
+**Success Response (201):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "title": "Software Engineer",
+    "description": "Full-stack software development",
+    "departmentId": "DEV-26-07-001",
+    "createdAt": "2025-07-01T08:00:00.000Z",
+    "updatedAt": "2025-07-01T08:00:00.000Z"
+  }
+}
+```
+
+**Validation:**
+| Field | Type | Rules |
+|-------------|--------|----------------------------------------------------------|
+| title | string | Required, min 2 characters, must be unique within the department (case-insensitive) |
+| description | string | Optional |
+
+**Error Response (400) — duplicate title:**
+
+```json
+{
+  "success": false,
+  "message": "Position \"Software Engineer\" already exists in this department"
+}
+```
+
+---
+
+### 3.8 Update Position
+
+**`PUT /departments/:departmentId/positions/:positionId`**
+
+**Request Body (partial):**
+
+```json
+{
+  "title": "Senior Software Engineer",
+  "description": "Senior full-stack software development role"
+}
+```
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "Position updated successfully",
+  "data": {
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "title": "Senior Software Engineer",
+    "description": "Senior full-stack software development role",
+    "departmentId": "DEV-26-07-001",
+    "createdAt": "2025-07-01T08:00:00.000Z",
+    "updatedAt": "2025-07-02T10:00:00.000Z"
+  }
+}
+```
+
+---
+
+### 3.9 Delete Position
+
+**`DELETE /departments/:departmentId/positions/:positionId`**
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "Position deleted successfully"
+}
+```
+
+**Error Response (400) — employees assigned:**
+
+```json
+{
+  "success": false,
+  "message": "Cannot delete — 3 employee(s) are assigned to this position. Reassign them first."
+}
+```
+
+---
+
+### 3.10 Position Headcount Stats
+
+Get a headcount summary for each position in a department.
+
+**`GET /departments/:departmentId/positions/stats`**
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "stats": [
+      {
+        "positionId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "title": "Software Engineer",
+        "employeeCount": 5
+      },
+      {
+        "positionId": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+        "title": "Lead Developer",
+        "employeeCount": 1
+      }
+    ]
+  }
+}
+```
+
+---
+
+## 5. Dashboard
+
+### 5.1 Get Dashboard Statistics
 
 Aggregated counts and metrics for the overview page.
 
@@ -1009,9 +1178,9 @@ Aggregated counts and metrics for the overview page.
 
 ---
 
-## 5. Reports
+## 6. Reports
 
-### 5.1 Employee Summary Report
+### 6.1 Employee Summary Report
 
 Get aggregate employee data for the reports page.
 
@@ -1040,7 +1209,7 @@ Get aggregate employee data for the reports page.
 
 ---
 
-### 5.2 Salary Summary Report
+### 6.2 Salary Summary Report
 
 Get payroll and compensation data.
 
@@ -1075,7 +1244,7 @@ Get payroll and compensation data.
 
 ---
 
-### 5.3 Hiring Trend Report
+### 6.3 Hiring Trend Report
 
 Get employee growth data over time.
 
@@ -1101,7 +1270,7 @@ Get employee growth data over time.
 
 ---
 
-### 5.4 Export Reports
+### 6.4 Export Reports
 
 Generate and download a report in the specified format.
 
@@ -1118,9 +1287,9 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
 
 ---
 
-## 6. Settings
+## 7. Settings
 
-### 6.1 Get Settings
+### 7.1 Get Settings
 
 **`GET /settings`**
 
@@ -1149,7 +1318,7 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
 
 ---
 
-### 6.2 Update Company Information
+### 7.2 Update Company Information
 
 **`PUT /settings/company`**
 
@@ -1195,9 +1364,9 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
 
 ---
 
-## 7. File Uploads
+## 8. File Uploads
 
-### 7.1 Upload File
+### 8.1 Upload File
 
 Upload employee documents, profile photos, or any attachment.
 
@@ -1228,7 +1397,7 @@ Upload employee documents, profile photos, or any attachment.
 
 ---
 
-## 8. Data Models
+## 9. Data Models
 
 ### Employee
 
@@ -1244,7 +1413,8 @@ Upload employee documents, profile photos, or any attachment.
   "address": "string (optional)",
   "emergencyContact": "string (optional)",
   "department": "string (references Department.name)",
-  "position": "string",
+  "position": "string (resolved position title from Position model)",
+  "positionId": "string (UUID, FK to Position.id)",
   "employmentType": "string (Full-time | Part-time | Contract | Intern | Remote)",
   "hireDate": "string (ISO date)",
   "reportingManager": "string (optional)",
@@ -1271,6 +1441,24 @@ Upload employee documents, profile photos, or any attachment.
   "dateCreated": "string (ISO date)"
 }
 ```
+
+### Position
+
+```json
+{
+  "id": "string (UUID, auto-generated)",
+  "departmentId": "string (FK to Department.id)",
+  "title": "string (unique per department, case-insensitive)",
+  "description": "string (optional)",
+  "createdAt": "string (ISO datetime)",
+  "updatedAt": "string (ISO datetime)"
+}
+```
+
+- A department can have many positions.
+- Position titles must be unique within a department (case-insensitive).
+- Deleting a department cascade-deletes all its positions.
+- Employees reference positions via `positionId` (FK to `Position.id`).
 
 ### Education
 
@@ -1398,21 +1586,30 @@ Upload employee documents, profile photos, or any attachment.
 | 20  | POST   | `/departments`                    | Create department              |
 | 21  | PUT    | `/departments/:id`                | Update department              |
 | 22  | DELETE | `/departments/:id`                | Delete department              |
-| 23  | GET    | `/dashboard/stats`                | Dashboard overview statistics  |
-| 24  | GET    | `/reports/employee-summary`       | Employee summary report        |
-| 25  | GET    | `/reports/salary-summary`         | Salary/payroll report          |
-| 26  | GET    | `/reports/hiring-trend`           | Hiring growth trend data       |
-| 27  | GET    | `/reports/export`                 | Export report as CSV/Excel/PDF |
-| 28  | GET    | `/settings`                       | Get company settings           |
-| 29  | PUT    | `/settings/company`               | Update company info            |
-| 31  | POST   | `/upload`                         | Upload file (documents/photos) |
+| 23  | GET    | `/departments/:deptId/positions`       | List department positions          |
+| 24  | POST   | `/departments/:deptId/positions`       | Create position in department      |
+| 25  | PUT    | `/departments/:deptId/positions/:posId`| Update position                    |
+| 26  | DELETE | `/departments/:deptId/positions/:posId`| Delete position                    |
+| 27  | GET    | `/departments/:deptId/positions/stats` | Position headcount stats           |
+| 28  | GET    | `/dashboard/stats`                     | Dashboard overview statistics      |
+| 29  | GET    | `/reports/employee-summary`            | Employee summary report            |
+| 30  | GET    | `/reports/salary-summary`              | Salary/payroll report              |
+| 31  | GET    | `/reports/hiring-trend`                | Hiring growth trend data           |
+| 32  | GET    | `/reports/export`                      | Export report as CSV/Excel/PDF     |
+| 33  | GET    | `/settings`                            | Get company settings               |
+| 34  | PUT    | `/settings/company`                    | Update company info                |
+| 35  | POST   | `/upload`                              | Upload file (documents/photos)     |
 
 ---
 
 > **Notes for the Backend Team:**
 >
 > - Employee IDs follow the format `EMP-YY-MM-SEQ`, Department IDs follow `ABB-YY-MM-SEQ`.
-> - The `department` field on an employee references `Department.name` (not the ID). Consider whether to use a `departmentId` foreign key instead for better normalization.
+> - The `department` field on an employee references `Department.name` (not the ID).
+> - The `position` field on an employee is a **foreign key** (`positionId`) referencing `Position.id`. The frontend should call `GET /departments/:deptId/positions` after department selection to populate the position dropdown — no free-text input for position.
+> - If an employee's department is changed, the position **must be re-specified** (the old position likely doesn't exist in the new department).
+> - Deleting a position is **blocked** if employees are currently assigned to it.
+> - Deleting a department cascade-deletes all its positions.
 > - The `photoUrl` on employees can be a file upload URL or an external URL (e.g., from Unsplash).
 > - Document uploads will likely require file storage integration (S3, Cloudinary, etc.).
 > - The `reports/export` endpoint should stream the file for download.
