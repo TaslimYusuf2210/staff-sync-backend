@@ -13,14 +13,31 @@ const transporter = nodemailer.createTransport({
     user: config.brevo.smtpUser,
     pass: config.brevo.smtpPass,
   },
+  connectionTimeout: 5000, // 5s — don't hang forever if SMTP is unreachable
 });
 
 /**
  * Send a 6-digit OTP email.
+ *
+ * In development mode, if SMTP credentials are missing or sending fails,
+ * the OTP is logged to the console instead so the registration flow can
+ * still be tested without a working mail server.
+ *
  * @param {string} to - Recipient email address
  * @param {string} otp - The 6-digit OTP code
  */
 async function sendOtpEmail(to, otp) {
+  // In development, always log OTP to console instead of sending real emails.
+  // This avoids SMTP timeouts and allows testing the registration flow offline.
+  if (config.isDev) {
+    console.log('═══════════════════════════════════════════');
+    console.log('  📧 DEV MODE — OTP for', to);
+    console.log('  🔑 Code:', otp);
+    console.log('  ⏳ Expires in 5 minutes');
+    console.log('═══════════════════════════════════════════');
+    return;
+  }
+
   const mailOptions = {
     from: `"StaffSync" <${config.brevo.fromEmail}>`,
     to,

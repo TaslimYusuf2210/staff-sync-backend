@@ -281,7 +281,7 @@ exports.sendOtp = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'OTP sent to email',
+      data: { message: 'OTP sent to email' },
     });
   } catch (error) {
     next(error);
