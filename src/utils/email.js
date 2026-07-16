@@ -2,13 +2,13 @@ const nodemailer = require('nodemailer');
 const config = require('../config');
 
 /**
- * Create a reusable transporter using Brevo SMTP.
+ * Create a reusable transporter using SMTP (Brevo or configured provider).
  * See https://help.brevo.com/hc/en-us/articles/360010425260-How-to-configure-Brevo-SMTP
  */
 const transporter = nodemailer.createTransport({
   host: config.brevo.smtpHost,
   port: config.brevo.smtpPort,
-  secure: false, // true for 465, false for other ports
+  secure: config.brevo.smtpPort === 465, // true for 465, false for other ports
   auth: {
     user: config.brevo.smtpUser,
     pass: config.brevo.smtpPass,
@@ -19,25 +19,16 @@ const transporter = nodemailer.createTransport({
 /**
  * Send a 6-digit OTP email.
  *
- * In development mode, if SMTP credentials are missing or sending fails,
- * the OTP is logged to the console instead so the registration flow can
- * still be tested without a working mail server.
+ * Strategy:
+ *  1. Always try real SMTP first.
+ *  2. If SMTP fails in development — log the OTP to the console as a
+ *     fallback so the registration flow can still be tested offline.
+ *  3. If SMTP fails in production — throw the error (caller returns a 500).
  *
  * @param {string} to - Recipient email address
  * @param {string} otp - The 6-digit OTP code
  */
 async function sendOtpEmail(to, otp) {
-  // In development, always log OTP to console instead of sending real emails.
-  // This avoids SMTP timeouts and allows testing the registration flow offline.
-  if (config.isDev) {
-    console.log('═══════════════════════════════════════════');
-    console.log('  📧 DEV MODE — OTP for', to);
-    console.log('  🔑 Code:', otp);
-    console.log('  ⏳ Expires in 5 minutes');
-    console.log('═══════════════════════════════════════════');
-    return;
-  }
-
   const mailOptions = {
     from: `"StaffSync" <${config.brevo.fromEmail}>`,
     to,
@@ -69,7 +60,25 @@ async function sendOtpEmail(to, otp) {
     `,
   };
 
-  await transporter.sendMail(mailOptions);
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ OTP email sent to ${to}`);
+    return true;
+  } catch (err) {
+    if (config.isDev) {
+      // Dev fallback — log OTP to console so testing can continue
+      console.log('═══════════════════════════════════════════');
+      console.log('  ⚠️  SMTP unavailable — dev fallback');
+      console.log('  📧 OTP for', to);
+      console.log('  🔑 Code:', otp);
+      console.log('  ⏳ Expires in 5 minutes');
+      console.log('  ❌ SMTP error:', err.message);
+      console.log('═══════════════════════════════════════════');
+      return false;
+    }
+    // Production — propagate the error so the caller returns a 500
+    throw err;
+  }
 }
 
 module.exports = { sendOtpEmail };

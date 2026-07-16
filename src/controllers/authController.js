@@ -277,11 +277,14 @@ exports.sendOtp = async (req, res, next) => {
     setOtp(email, otp, 5 * 60 * 1000);
 
     // Send OTP email
-    await sendOtpEmail(email, otp);
+    const sent = await sendOtpEmail(email, otp);
 
     res.json({
       success: true,
-      data: { message: 'OTP sent to email' },
+      data: {
+        message: sent ? 'OTP sent to email' : 'OTP generated (dev mode — check server console)',
+        ...(config.isDev && !sent ? { devOtp: otp } : {}),
+      },
     });
   } catch (error) {
     next(error);

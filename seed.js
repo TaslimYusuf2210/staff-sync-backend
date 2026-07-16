@@ -1,17 +1,26 @@
 /**
  * Seed script — populates the database with initial sample data.
  *
- * SAFE by default — will NOT drop existing data unless you pass --force.
+ * SAFE by default — will NOT drop existing data.
+ * To force a full reset you must pass BOTH --force AND type a confirmation.
  *
  * Usage:
- *   node seed.js          # seed only if database is empty
- *   node seed.js --force  # DROP all data and re-seed (⚠️ destructive)
+ *   node seed.js                     # seed only if database is empty
+ *   node seed.js --force             # will prompt for confirmation first
+ *   node seed.js --force --yes       # skip prompt (CI / automation only)
  */
 const bcrypt = require('bcryptjs');
 const { sequelize, testConnection } = require('./src/config/database');
 require('./src/models');
 const { Admin, Company, Department, Employee, Salary, BankAccount, Education, Note } = require('./src/models');
 const { generateDepartmentId, deriveAbbreviation, generateEmployeeId } = require('./src/utils/generateId');
+const readline = require('readline');
+
+/** Ask the user a yes/no question in the terminal. */
+function askQuestion(query) {
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => rl.question(query, (ans) => { rl.close(); resolve(ans.trim().toLowerCase()); }));
+}
 
 const seed = async () => {
   const connected = await testConnection();
@@ -21,6 +30,7 @@ const seed = async () => {
   }
 
   const forceMode = process.argv.includes('--force');
+  const autoYes  = process.argv.includes('--yes');
 
   // Check if data already exists
   const adminCount = await Admin.count();
@@ -29,12 +39,31 @@ const seed = async () => {
   if (hasData && !forceMode) {
     console.log('⚠️  Database already contains data. Skipping seed.');
     console.log('   To re-seed from scratch, run: node seed.js --force');
-    console.log('   (This will DROP all existing data!)');
+    console.log('   (You will be asked to confirm before any data is dropped.)');
     process.exit(0);
   }
 
-  if (forceMode) {
-    console.log('⚠️  WARNING: --force mode enabled. Dropping all tables...');
+  if (forceMode && hasData) {
+    console.log('\n⚠️  ╔══════════════════════════════════════════════════╗');
+    console.log('⚠️  ║   DESTRUCTIVE ACTION — ALL DATA WILL BE LOST    ║');
+    console.log('⚠️  ╚══════════════════════════════════════════════════╝');
+    console.log('');
+
+    if (!autoYes) {
+      const answer = await askQuestion(
+        '   Type "delete everything" to confirm: '
+      );
+      if (answer !== 'delete everything') {
+        console.log('   ❌ Confirmation failed. Aborting.');
+        process.exit(1);
+      }
+    }
+
+    console.log('   Dropping all tables and re-seeding...');
+    await sequelize.sync({ force: true });
+    console.log('✅ Tables recreated');
+  } else if (forceMode) {
+    // Database is empty, safe to seed without confirmation
     await sequelize.sync({ force: true });
     console.log('✅ Tables recreated');
   } else {
