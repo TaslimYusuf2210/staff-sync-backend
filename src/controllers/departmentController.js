@@ -1,3 +1,4 @@
+const { Sequelize } = require('sequelize');
 const { Department, Employee, Position } = require('../models');
 const AppError = require('../utils/AppError');
 const { generateDepartmentId, deriveAbbreviation } = require('../utils/generateId');
@@ -8,30 +9,26 @@ exports.list = async (req, res, next) => {
   try {
     const departments = await Department.findAll({
       where: { companyId: req.user.companyId },
-      include: [{ model: Employee, as: 'Employees', attributes: [] }],
       attributes: {
         include: [
-          [require('sequelize').fn('COUNT', require('sequelize').col('Employees.id')), 'employeeCount'],
+          [
+            Sequelize.literal(`(SELECT COUNT(*) FROM employees WHERE employees.departmentId = Department.id)`),
+            'employeeCount',
+          ],
         ],
       },
-      group: ['Department.id'],
-      raw: true,
-      nest: true,
     });
-
-    // If no departments, return empty
-    const result = departments.length > 0 ? departments : await Department.findAll({ where: { companyId: req.user.companyId } });
 
     res.json({
       success: true,
       data: {
-        departments: result.map((d) => ({
+        departments: departments.map((d) => ({
           id: d.id,
           name: d.name,
           abbreviation: d.abbreviation,
           description: d.description,
           head: d.head,
-          employeeCount: d.employeeCount || 0,
+          employeeCount: Number(d.get('employeeCount')) || 0,
           dateCreated: d.dateCreated,
         })),
       },
