@@ -12,12 +12,13 @@
 1. [Authentication](#1-authentication)
 2. [Employees](#2-employees)
 3. [Departments](#3-departments)
-4. [Department Positions](#4-department-positions)
+4. [Department Positions](#3-department-positions)
 5. [Dashboard](#5-dashboard)
 6. [Reports](#6-reports)
 7. [Settings](#7-settings)
 8. [File Uploads](#8-file-uploads)
-9. [Data Models](#9-data-models)
+9. [Health](#10-health)
+10. [Data Models](#11-data-models)
 
 ---
 
@@ -339,7 +340,7 @@ Get a paginated, searchable, filterable, sortable list of employees.
 | limit | integer | 10 | Items per page |
 | search | string | — | Search by name, ID, or position (partial match) |
 | department | string | — | Filter by department name (exact match) |
-| status | string | — | Filter by status: `Active`, `Inactive`, `Probation`, `Resigned`, `Terminated` |
+| status | string | — | Filter by status: `Active`, `Inactive`, `Probation`, `OnLeave`, `Resigned`, `Terminated` |
 | sortBy | string | `name` | Sort field: `name`, `dept`, `joined` |
 | sortOrder | string | `asc` | Sort direction: `asc` or `desc` |
 
@@ -1447,7 +1448,28 @@ Upload employee documents, profile photos, or any attachment.
 
 ---
 
-## 9. Data Models
+## 10. Health
+
+### 10.1 Health Check
+
+Check if the API is running.
+
+**`GET /api/health`**
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "message": "StaffSync API is running",
+  "uptime": 190.48,
+  "timestamp": "2026-07-16T21:57:26.582Z"
+}
+```
+
+---
+
+## 11. Data Models
 
 ### Employee
 
@@ -1484,10 +1506,12 @@ Upload employee documents, profile photos, or any attachment.
 
 ```json
 {
-  "id": "string (auto-generated, format: dep-xxx)",
+  "id": "string (auto-generated, format: ABB-YY-MM-SEQ, e.g. DES-26-07-001)",
   "name": "string (unique)",
+  "abbreviation": "string (auto-derived, e.g. DES)",
   "description": "string",
   "head": "string",
+  "employeeCount": "integer",
   "dateCreated": "string (ISO date)"
 }
 ```
@@ -1582,7 +1606,12 @@ Upload employee documents, profile photos, or any attachment.
   "name": "string",
   "email": "string",
   "phoneNumber": "string",
-  "address": "string"
+  "address": {
+    "state": "string",
+    "lga": "string",
+    "settlement": "string",
+    "street": "string"
+  }
 }
 ```
 

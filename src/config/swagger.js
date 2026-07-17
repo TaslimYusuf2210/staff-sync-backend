@@ -74,8 +74,17 @@ const options = {
             companyName: { type: 'string', minLength: 2, example: 'Rocks Company Ltd' },
             email: { type: 'string', format: 'email', example: 'admin@rockscompany.com' },
             description: { type: 'string', example: 'Corporate Headquarters' },
-            phone: { type: 'string', example: '08000000000' },
-            address: { type: 'string', example: '42 Example Street, Lagos, Nigeria' },
+            phone: { type: 'string', example: '+2348129887896' },
+            address: {
+              type: 'object',
+              required: ['state', 'lga', 'settlement', 'street'],
+              properties: {
+                state: { type: 'string', example: 'FCT' },
+                lga: { type: 'string', example: 'Municipal' },
+                settlement: { type: 'string', example: 'Wuse 2' },
+                street: { type: 'string', example: '42 Michael Okpara Street, House 7' },
+              },
+            },
             password: { type: 'string', minLength: 6, example: 'securePassword123' },
             agreeTerms: { type: 'boolean', example: true },
           },
@@ -585,7 +594,32 @@ const options = {
           description: 'Update one or more fields of an employee record. Supports partial updates.',
           security: [{ bearerAuth: [] }],
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-          requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { firstName: { type: 'string' }, lastName: { type: 'string' }, email: { type: 'string' }, phoneNumber: { type: 'string' }, department: { type: 'string' }, positionId: { type: 'string', description: 'UUID of the Position (must belong to the department)' }, employmentType: { type: 'string' }, status: { type: 'string' } } } } } },
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    firstName: { type: 'string' },
+                    lastName: { type: 'string' },
+                    email: { type: 'string', format: 'email' },
+                    phoneNumber: { type: 'string' },
+                    gender: { type: 'string', enum: ['Male', 'Female', 'Other'] },
+                    dob: { type: 'string', format: 'date' },
+                    address: { type: 'string' },
+                    emergencyContact: { type: 'string' },
+                    department: { type: 'string', description: 'Department name' },
+                    positionId: { type: 'string', description: 'UUID of the Position (must belong to the department). Required if department changes.' },
+                    employmentType: { type: 'string', enum: ['Full-time', 'Part-time', 'Contract', 'Intern', 'Remote'] },
+                    hireDate: { type: 'string', format: 'date' },
+                    reportingManager: { type: 'string' },
+                    status: { type: 'string', enum: ['Active', 'Inactive', 'Probation', 'OnLeave', 'Resigned', 'Terminated'] },
+                    photoUrl: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
           responses: { 200: { description: 'Employee updated' }, 404: { description: 'Employee not found' } },
         },
         delete: {
