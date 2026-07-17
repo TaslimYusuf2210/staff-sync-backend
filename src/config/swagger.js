@@ -317,6 +317,48 @@ const options = {
             description: { type: 'string', example: 'Full-stack software development' },
           },
         },
+        CreatePositionsBulkRequest: {
+          type: 'object',
+          required: ['positions'],
+          properties: {
+            positions: {
+              type: 'array',
+              minItems: 1,
+              items: { $ref: '#/components/schemas/CreatePositionRequest' },
+              example: [
+                { title: 'Software Engineer', description: 'Full-stack development' },
+                { title: 'QA Engineer', description: 'Quality assurance testing' },
+                { title: 'DevOps Engineer', description: 'Infrastructure and CI/CD' },
+              ],
+            },
+          },
+        },
+        BulkCreateResult: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+            data: {
+              type: 'object',
+              properties: {
+                created: { type: 'array', items: { $ref: '#/components/schemas/Position' } },
+                errors: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      index: { type: 'integer' },
+                      title: { type: 'string' },
+                      error: { type: 'string' },
+                    },
+                  },
+                },
+                totalCreated: { type: 'integer' },
+                totalErrors: { type: 'integer' },
+              },
+            },
+          },
+        },
         PositionStats: {
           type: 'object',
           properties: {
@@ -754,6 +796,20 @@ const options = {
           responses: {
             201: { description: 'Position created', content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean' }, data: { $ref: '#/components/schemas/Position' } } } } } },
             400: { description: 'Validation error — duplicate title or invalid data', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          },
+        },
+      },
+      '/departments/{departmentId}/positions/bulk': {
+        post: {
+          tags: ['Department Positions'],
+          summary: 'Bulk Create Positions',
+          description: 'Create multiple positions in a department in a single request. Skips duplicates and reports errors per item.',
+          security: [{ bearerAuth: [] }],
+          parameters: [{ name: 'departmentId', in: 'path', required: true, schema: { type: 'string' } }],
+          requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/CreatePositionsBulkRequest' } } } },
+          responses: {
+            201: { description: 'Positions created (some may have errors)', content: { 'application/json': { schema: { $ref: '#/components/schemas/BulkCreateResult' } } } },
+            400: { description: 'Validation error', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
           },
         },
       },

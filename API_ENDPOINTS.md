@@ -1033,7 +1033,55 @@ Get all positions belonging to a department. Used to populate the position dropd
 
 ---
 
-### 3.8 Update Position
+### 3.8 Bulk Create Positions
+
+Create multiple positions at once — useful when setting up a new department's positions.
+
+**`POST /departments/:departmentId/positions/bulk`**
+
+**Request Body:**
+
+```json
+{
+  "positions": [
+    { "title": "Software Engineer", "description": "Full-stack development" },
+    { "title": "QA Engineer", "description": "Quality assurance testing" },
+    { "title": "DevOps Engineer", "description": "Infrastructure and CI/CD" }
+  ]
+}
+```
+
+**Success Response (201):**
+
+```json
+{
+  "success": true,
+  "message": "Successfully created 3 position(s)",
+  "data": {
+    "created": [
+      {
+        "id": "a1b2c3d4-...",
+        "title": "Software Engineer",
+        "description": "Full-stack development",
+        "departmentId": "DEV-26-07-001",
+        "createdAt": "2025-07-01T08:00:00.000Z",
+        "updatedAt": "2025-07-01T08:00:00.000Z"
+      }
+    ],
+    "errors": [
+      { "index": 3, "title": "Duplicate Title", "error": "Position \"Duplicate Title\" already exists in this department" }
+    ],
+    "totalCreated": 3,
+    "totalErrors": 1
+  }
+}
+```
+
+> Skips items with validation errors or duplicates and continues processing the rest. Reports both `created` and `errors` arrays so you know exactly what succeeded and what didn't.
+
+---
+
+### 3.9 Update Position
 
 **`PUT /departments/:departmentId/positions/:positionId`**
 
@@ -1065,9 +1113,11 @@ Get all positions belonging to a department. Used to populate the position dropd
 
 ---
 
-### 3.9 Delete Position
+### 3.10 Delete Position
 
 **`DELETE /departments/:departmentId/positions/:positionId`**
+
+**Success Response (200):**
 
 **Success Response (200):**
 
@@ -1089,7 +1139,7 @@ Get all positions belonging to a department. Used to populate the position dropd
 
 ---
 
-### 3.10 Position Headcount Stats
+### 3.11 Position Headcount Stats
 
 Get a headcount summary for each position in a department.
 
@@ -1588,17 +1638,18 @@ Upload employee documents, profile photos, or any attachment.
 | 22  | DELETE | `/departments/:id`                      | Delete department              |
 | 23  | GET    | `/departments/:deptId/positions`        | List department positions      |
 | 24  | POST   | `/departments/:deptId/positions`        | Create position in department  |
-| 25  | PUT    | `/departments/:deptId/positions/:posId` | Update position                |
-| 26  | DELETE | `/departments/:deptId/positions/:posId` | Delete position                |
-| 27  | GET    | `/departments/:deptId/positions/stats`  | Position headcount stats       |
-| 28  | GET    | `/dashboard/stats`                      | Dashboard overview statistics  |
-| 29  | GET    | `/reports/employee-summary`             | Employee summary report        |
-| 30  | GET    | `/reports/salary-summary`               | Salary/payroll report          |
-| 31  | GET    | `/reports/hiring-trend`                 | Hiring growth trend data       |
-| 32  | GET    | `/reports/export`                       | Export report as CSV/Excel/PDF |
-| 33  | GET    | `/settings`                             | Get company settings           |
-| 34  | PUT    | `/settings/company`                     | Update company info            |
-| 35  | POST   | `/upload`                               | Upload file (documents/photos) |
+| 25  | POST   | `/departments/:deptId/positions/bulk`   | Bulk create positions          |
+| 26  | PUT    | `/departments/:deptId/positions/:posId` | Update position                |
+| 27  | DELETE | `/departments/:deptId/positions/:posId` | Delete position                |
+| 28  | GET    | `/departments/:deptId/positions/stats`  | Position headcount stats       |
+| 29  | GET    | `/dashboard/stats`                      | Dashboard overview statistics  |
+| 30  | GET    | `/reports/employee-summary`             | Employee summary report        |
+| 31  | GET    | `/reports/salary-summary`               | Salary/payroll report          |
+| 32  | GET    | `/reports/hiring-trend`                 | Hiring growth trend data       |
+| 33  | GET    | `/reports/export`                       | Export report as CSV/Excel/PDF |
+| 34  | GET    | `/settings`                             | Get company settings           |
+| 35  | PUT    | `/settings/company`                     | Update company info            |
+| 36  | POST   | `/upload`                               | Upload file (documents/photos) |
 
 ---
 

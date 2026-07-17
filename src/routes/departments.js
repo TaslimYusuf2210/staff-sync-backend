@@ -19,6 +19,7 @@ router.delete('/:id', departmentController.remove);
 
 router.get('/:departmentId/positions/stats', positionController.stats);
 router.get('/:departmentId/positions', positionController.list);
+router.post('/:departmentId/positions/bulk', positionController.createBulk);
 router.post('/:departmentId/positions', positionController.create);
 router.put('/:departmentId/positions/:positionId', positionController.update);
 router.delete('/:departmentId/positions/:positionId', positionController.remove);
