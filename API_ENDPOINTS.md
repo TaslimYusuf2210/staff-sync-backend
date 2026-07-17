@@ -990,17 +990,15 @@ Get all positions belonging to a department. Used to populate the position dropd
 
 ### 3.7 Create Position
 
-Creates one or more positions in a department. Accepts an array — send a single item for one position, or multiple items for bulk creation.
-
 **`POST /departments/:departmentId/positions`**
 
 **Request Body:**
 
 ```json
-[
-  { "title": "Software Engineer", "description": "Full-stack development" },
-  { "title": "QA Engineer", "description": "Quality assurance testing" }
-]
+{
+  "title": "Software Engineer",
+  "description": "Full-stack software development"
+}
 ```
 
 **Success Response (201):**
@@ -1008,34 +1006,31 @@ Creates one or more positions in a department. Accepts an array — send a singl
 ```json
 {
   "success": true,
-  "message": "Successfully created 2 position(s)",
   "data": {
-    "created": [
-      {
-        "id": "a1b2c3d4-...",
-        "title": "Software Engineer",
-        "description": "Full-stack development",
-        "departmentId": "DEV-26-07-001",
-        "createdAt": "2025-07-01T08:00:00.000Z",
-        "updatedAt": "2025-07-01T08:00:00.000Z"
-      }
-    ],
-    "errors": [
-      { "index": 2, "title": "Duplicate Title", "error": "Position \"Duplicate Title\" already exists in this department" }
-    ],
-    "totalCreated": 2,
-    "totalErrors": 1
+    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "title": "Software Engineer",
+    "description": "Full-stack software development",
+    "departmentId": "DEV-26-07-001",
+    "createdAt": "2025-07-01T08:00:00.000Z",
+    "updatedAt": "2025-07-01T08:00:00.000Z"
   }
 }
 ```
 
-**Validation (per item):**
+**Validation:**
 | Field | Type | Rules |
 |-------------|--------|----------------------------------------------------------|
 | title | string | Required, min 2 characters, must be unique within the department (case-insensitive) |
 | description | string | Optional |
 
-> Items with validation errors or duplicates are skipped individually — valid items still get created. The response includes both `created` and `errors` arrays.
+**Error Response (400) — duplicate title:**
+
+```json
+{
+  "success": false,
+  "message": "Position \"Software Engineer\" already exists in this department"
+}
+```
 
 ---
 
@@ -1623,7 +1618,7 @@ Check if the API is running.
 | 21  | PUT    | `/departments/:id`                      | Update department              |
 | 22  | DELETE | `/departments/:id`                      | Delete department              |
 | 23  | GET    | `/departments/:deptId/positions`        | List department positions      |
-| 24  | POST   | `/departments/:deptId/positions`        | Create position(s) — single or bulk |
+| 24  | POST   | `/departments/:deptId/positions`        | Create position in department      |
 | 25  | PUT    | `/departments/:deptId/positions/:posId` | Update position                    |
 | 26  | DELETE | `/departments/:deptId/positions/:posId` | Delete position                    |
 | 27  | GET    | `/departments/:deptId/positions/stats`  | Position headcount stats           |

@@ -36,76 +36,47 @@ exports.list = async (req, res, next) => {
 };
 
 // ─── POST /departments/:departmentId/positions ──────────────
-// Accepts an array of positions — single or bulk in one endpoint.
-// Body: [{ "title": "...", "description": "..." }, ...]
 
 exports.create = async (req, res, next) => {
   try {
     await verifyDepartmentAccess(req.params.departmentId, req.user.companyId);
 
-    const positions = req.body;
+    const { title, description } = req.body;
 
-    if (!Array.isArray(positions) || positions.length === 0) {
-      throw new AppError('Request body must be a non-empty array of positions', 400);
+    if (!title || title.trim().length < 2) {
+      throw new AppError('Position title must be at least 2 characters', 400);
     }
 
-    const created = [];
-    const errors = [];
-
-    for (let i = 0; i < positions.length; i++) {
-      const { title, description } = positions[i];
-
-      if (!title || title.trim().length < 2) {
-        errors.push({ index: i, title: title || '', error: 'Title must be at least 2 characters' });
-        continue;
-      }
-
-      // Case-insensitive uniqueness check (against existing + already created in this batch)
-      const trimmedTitle = title.trim();
-      const duplicateInDb = await Position.findOne({
-        where: {
-          departmentId: req.params.departmentId,
-          title: { [Op.like]: trimmedTitle },
-        },
-      });
-      const duplicateInBatch = created.find(
-        (p) => p.title.toLowerCase() === trimmedTitle.toLowerCase()
-      );
-
-      if (duplicateInDb || duplicateInBatch) {
-        errors.push({ index: i, title: trimmedTitle, error: `Position "${trimmedTitle}" already exists in this department` });
-        continue;
-      }
-
-      const position = await Position.create({
-        id: uuidv4(),
+    // Case-insensitive uniqueness check
+    const existing = await Position.findOne({
+      where: {
         departmentId: req.params.departmentId,
-        title: trimmedTitle,
-        description: description || null,
-      });
+        title: { [Op.like]: title.trim() },
+      },
+    });
+    if (existing) {
+      throw new AppError(
+        `Position "${title.trim()}" already exists in this department`,
+        400
+      );
+    }
 
-      created.push({
+    const position = await Position.create({
+      id: uuidv4(),
+      departmentId: req.params.departmentId,
+      title: title.trim(),
+      description: description || null,
+    });
+
+    res.status(201).json({
+      success: true,
+      data: {
         id: position.id,
         title: position.title,
         description: position.description,
         departmentId: position.departmentId,
         createdAt: position.createdAt,
         updatedAt: position.updatedAt,
-      });
-    }
-
-    const statusCode = created.length > 0 ? 201 : 400;
-
-    res.status(statusCode).json({
-      success: created.length > 0,
-      message: created.length > 0
-        ? `Successfully created ${created.length} position(s)`
-        : 'No positions were created',
-      data: {
-        created,
-        errors: errors.length > 0 ? errors : undefined,
-        totalCreated: created.length,
-        totalErrors: errors.length,
       },
     });
   } catch (error) {
