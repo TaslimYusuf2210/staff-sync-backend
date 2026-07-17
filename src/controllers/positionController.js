@@ -36,64 +36,17 @@ exports.list = async (req, res, next) => {
 };
 
 // ─── POST /departments/:departmentId/positions ──────────────
+// Accepts an array of positions — single or bulk in one endpoint.
+// Body: [{ "title": "...", "description": "..." }, ...]
 
 exports.create = async (req, res, next) => {
   try {
     await verifyDepartmentAccess(req.params.departmentId, req.user.companyId);
 
-    const { title, description } = req.body;
-
-    if (!title || title.trim().length < 2) {
-      throw new AppError('Position title must be at least 2 characters', 400);
-    }
-
-    // Case-insensitive uniqueness check
-    const existing = await Position.findOne({
-      where: {
-        departmentId: req.params.departmentId,
-        title: { [Op.like]: title.trim() },
-      },
-    });
-    if (existing) {
-      throw new AppError(
-        `Position "${title.trim()}" already exists in this department`,
-        400
-      );
-    }
-
-    const position = await Position.create({
-      id: uuidv4(),
-      departmentId: req.params.departmentId,
-      title: title.trim(),
-      description: description || null,
-    });
-
-    res.status(201).json({
-      success: true,
-      data: {
-        id: position.id,
-        title: position.title,
-        description: position.description,
-        departmentId: position.departmentId,
-        createdAt: position.createdAt,
-        updatedAt: position.updatedAt,
-      },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// ─── POST /departments/:departmentId/positions/bulk ────────
-
-exports.createBulk = async (req, res, next) => {
-  try {
-    await verifyDepartmentAccess(req.params.departmentId, req.user.companyId);
-
-    const { positions } = req.body;
+    const positions = req.body;
 
     if (!Array.isArray(positions) || positions.length === 0) {
-      throw new AppError('Provide a non-empty array of positions', 400);
+      throw new AppError('Request body must be a non-empty array of positions', 400);
     }
 
     const created = [];
@@ -103,7 +56,7 @@ exports.createBulk = async (req, res, next) => {
       const { title, description } = positions[i];
 
       if (!title || title.trim().length < 2) {
-        errors.push({ index: i, title, error: 'Title must be at least 2 characters' });
+        errors.push({ index: i, title: title || '', error: 'Title must be at least 2 characters' });
         continue;
       }
 

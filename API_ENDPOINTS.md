@@ -990,15 +990,17 @@ Get all positions belonging to a department. Used to populate the position dropd
 
 ### 3.7 Create Position
 
+Creates one or more positions in a department. Accepts an array — send a single item for one position, or multiple items for bulk creation.
+
 **`POST /departments/:departmentId/positions`**
 
 **Request Body:**
 
 ```json
-{
-  "title": "Software Engineer",
-  "description": "Full-stack software development"
-}
+[
+  { "title": "Software Engineer", "description": "Full-stack development" },
+  { "title": "QA Engineer", "description": "Quality assurance testing" }
+]
 ```
 
 **Success Response (201):**
@@ -1006,58 +1008,7 @@ Get all positions belonging to a department. Used to populate the position dropd
 ```json
 {
   "success": true,
-  "data": {
-    "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
-    "title": "Software Engineer",
-    "description": "Full-stack software development",
-    "departmentId": "DEV-26-07-001",
-    "createdAt": "2025-07-01T08:00:00.000Z",
-    "updatedAt": "2025-07-01T08:00:00.000Z"
-  }
-}
-```
-
-**Validation:**
-| Field | Type | Rules |
-|-------------|--------|----------------------------------------------------------|
-| title | string | Required, min 2 characters, must be unique within the department (case-insensitive) |
-| description | string | Optional |
-
-**Error Response (400) — duplicate title:**
-
-```json
-{
-  "success": false,
-  "message": "Position \"Software Engineer\" already exists in this department"
-}
-```
-
----
-
-### 3.8 Bulk Create Positions
-
-Create multiple positions at once — useful when setting up a new department's positions.
-
-**`POST /departments/:departmentId/positions/bulk`**
-
-**Request Body:**
-
-```json
-{
-  "positions": [
-    { "title": "Software Engineer", "description": "Full-stack development" },
-    { "title": "QA Engineer", "description": "Quality assurance testing" },
-    { "title": "DevOps Engineer", "description": "Infrastructure and CI/CD" }
-  ]
-}
-```
-
-**Success Response (201):**
-
-```json
-{
-  "success": true,
-  "message": "Successfully created 3 position(s)",
+  "message": "Successfully created 2 position(s)",
   "data": {
     "created": [
       {
@@ -1070,19 +1021,25 @@ Create multiple positions at once — useful when setting up a new department's 
       }
     ],
     "errors": [
-      { "index": 3, "title": "Duplicate Title", "error": "Position \"Duplicate Title\" already exists in this department" }
+      { "index": 2, "title": "Duplicate Title", "error": "Position \"Duplicate Title\" already exists in this department" }
     ],
-    "totalCreated": 3,
+    "totalCreated": 2,
     "totalErrors": 1
   }
 }
 ```
 
-> Skips items with validation errors or duplicates and continues processing the rest. Reports both `created` and `errors` arrays so you know exactly what succeeded and what didn't.
+**Validation (per item):**
+| Field | Type | Rules |
+|-------------|--------|----------------------------------------------------------|
+| title | string | Required, min 2 characters, must be unique within the department (case-insensitive) |
+| description | string | Optional |
+
+> Items with validation errors or duplicates are skipped individually — valid items still get created. The response includes both `created` and `errors` arrays.
 
 ---
 
-### 3.9 Update Position
+### 3.8 Update Position
 
 **`PUT /departments/:departmentId/positions/:positionId`**
 
@@ -1114,7 +1071,7 @@ Create multiple positions at once — useful when setting up a new department's 
 
 ---
 
-### 3.10 Delete Position
+### 3.9 Delete Position
 
 **`DELETE /departments/:departmentId/positions/:positionId`**
 
@@ -1140,7 +1097,7 @@ Create multiple positions at once — useful when setting up a new department's 
 
 ---
 
-### 3.11 Position Headcount Stats
+### 3.10 Position Headcount Stats
 
 Get a headcount summary for each position in a department.
 
@@ -1666,12 +1623,11 @@ Check if the API is running.
 | 21  | PUT    | `/departments/:id`                      | Update department              |
 | 22  | DELETE | `/departments/:id`                      | Delete department              |
 | 23  | GET    | `/departments/:deptId/positions`        | List department positions      |
-| 24  | POST   | `/departments/:deptId/positions`        | Create position in department  |
-| 25  | POST   | `/departments/:deptId/positions/bulk`   | Bulk create positions          |
-| 26  | PUT    | `/departments/:deptId/positions/:posId` | Update position                |
-| 27  | DELETE | `/departments/:deptId/positions/:posId` | Delete position                |
-| 28  | GET    | `/departments/:deptId/positions/stats`  | Position headcount stats       |
-| 29  | GET    | `/dashboard/stats`                      | Dashboard overview statistics  |
+| 24  | POST   | `/departments/:deptId/positions`        | Create position(s) — single or bulk |
+| 25  | PUT    | `/departments/:deptId/positions/:posId` | Update position                    |
+| 26  | DELETE | `/departments/:deptId/positions/:posId` | Delete position                    |
+| 27  | GET    | `/departments/:deptId/positions/stats`  | Position headcount stats           |
+| 28  | GET    | `/dashboard/stats`                      | Dashboard overview statistics      |
 | 30  | GET    | `/reports/employee-summary`             | Employee summary report        |
 | 31  | GET    | `/reports/salary-summary`               | Salary/payroll report          |
 | 32  | GET    | `/reports/hiring-trend`                 | Hiring growth trend data       |
