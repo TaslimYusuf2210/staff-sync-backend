@@ -269,6 +269,34 @@ const options = {
           },
         },
 
+        // ─── Department Member ──────────────────────────────
+        DepartmentMember: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: 'EMP-26-07-001' },
+            firstName: { type: 'string', example: 'Brooklyn' },
+            lastName: { type: 'string', example: 'Simmons' },
+            email: { type: 'string', example: 'brok-simms@mail.com' },
+            position: { type: 'string', example: 'Creative Director' },
+            status: { type: 'string', enum: ['Active', 'Inactive', 'Probation', 'OnLeave', 'Resigned', 'Terminated'] },
+            hireDate: { type: 'string', format: 'date', example: '2024-01-10' },
+            photoUrl: { type: 'string', nullable: true, example: 'https://cdn.staffsync.com/photos/emp-101.jpg' },
+          },
+        },
+        DepartmentDetail: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: true },
+            data: {
+              type: 'object',
+              properties: {
+                department: { $ref: '#/components/schemas/Department' },
+                members: { type: 'array', items: { $ref: '#/components/schemas/DepartmentMember' } },
+              },
+            },
+          },
+        },
+
         // ─── Position ───────────────────────────────────────
         Position: {
           type: 'object',
@@ -656,7 +684,16 @@ const options = {
           description: 'Get department details and its members.',
           security: [{ bearerAuth: [] }],
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-          responses: { 200: { description: 'Department with members' } },
+          responses: {
+            200: {
+              description: 'Department with members',
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/DepartmentDetail' },
+                },
+              },
+            },
+          },
         },
         put: {
           tags: ['Departments'],
