@@ -145,6 +145,7 @@ const options = {
             phoneNumber: { type: 'string', example: '+1 312 908 1234' },
             department: { type: 'string', example: 'Design' },
             position: { type: 'string', example: 'Creative Director' },
+            positionId: { type: 'string', example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
             employmentType: { type: 'string', enum: ['Full-time', 'Part-time', 'Contract', 'Intern', 'Remote'] },
             status: { type: 'string', enum: ['Active', 'Inactive', 'Probation', 'Resigned', 'Terminated'] },
             hireDate: { type: 'string', format: 'date', example: '2024-01-10' },
@@ -175,7 +176,7 @@ const options = {
         },
         CreateEmployeeRequest: {
           type: 'object',
-          required: ['firstName', 'lastName', 'email', 'phoneNumber', 'gender', 'department', 'position', 'employmentType', 'hireDate'],
+          required: ['firstName', 'lastName', 'email', 'phoneNumber', 'gender', 'department', 'positionId', 'employmentType', 'hireDate'],
           properties: {
             firstName: { type: 'string', minLength: 2, example: 'John' },
             lastName: { type: 'string', minLength: 2, example: 'Doe' },
@@ -183,7 +184,7 @@ const options = {
             phoneNumber: { type: 'string', minLength: 6 },
             gender: { type: 'string', enum: ['Male', 'Female', 'Other'] },
             department: { type: 'string', example: 'Development' },
-            position: { type: 'string', minLength: 2 },
+            positionId: { type: 'string', description: 'UUID of the Position (must belong to the selected department)' },
             employmentType: { type: 'string', enum: ['Full-time', 'Part-time', 'Contract', 'Intern', 'Remote'] },
             hireDate: { type: 'string', format: 'date' },
             status: { type: 'string', enum: ['Active', 'Inactive', 'Probation', 'Resigned', 'Terminated'] },
@@ -265,6 +266,35 @@ const options = {
             head: { type: 'string', example: 'Brooklyn Simmons' },
             employeeCount: { type: 'integer', example: 12 },
             dateCreated: { type: 'string', format: 'date', example: '2024-01-10' },
+          },
+        },
+
+        // ─── Position ───────────────────────────────────────
+        Position: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
+            title: { type: 'string', example: 'Software Engineer' },
+            description: { type: 'string', example: 'Full-stack software development' },
+            departmentId: { type: 'string', example: 'DEV-26-07-001' },
+            createdAt: { type: 'string', format: 'date-time' },
+            updatedAt: { type: 'string', format: 'date-time' },
+          },
+        },
+        CreatePositionRequest: {
+          type: 'object',
+          required: ['title'],
+          properties: {
+            title: { type: 'string', minLength: 2, example: 'Software Engineer' },
+            description: { type: 'string', example: 'Full-stack software development' },
+          },
+        },
+        PositionStats: {
+          type: 'object',
+          properties: {
+            positionId: { type: 'string', example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
+            title: { type: 'string', example: 'Software Engineer' },
+            employeeCount: { type: 'integer', example: 5 },
           },
         },
 
@@ -485,7 +515,7 @@ const options = {
           description: 'Update one or more fields of an employee record. Supports partial updates.',
           security: [{ bearerAuth: [] }],
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-          requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { firstName: { type: 'string' }, lastName: { type: 'string' }, email: { type: 'string' }, phoneNumber: { type: 'string' }, department: { type: 'string' }, position: { type: 'string' }, employmentType: { type: 'string' }, status: { type: 'string' } } } } } },
+          requestBody: { content: { 'application/json': { schema: { type: 'object', properties: { firstName: { type: 'string' }, lastName: { type: 'string' }, email: { type: 'string' }, phoneNumber: { type: 'string' }, department: { type: 'string' }, positionId: { type: 'string', description: 'UUID of the Position (must belong to the department)' }, employmentType: { type: 'string' }, status: { type: 'string' } } } } } },
           responses: { 200: { description: 'Employee updated' }, 404: { description: 'Employee not found' } },
         },
         delete: {
@@ -642,6 +672,114 @@ const options = {
           security: [{ bearerAuth: [] }],
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
           responses: { 200: { description: 'Department deleted' } },
+        },
+      },
+
+      // ════════════════════════════════════════════════════════
+      // DEPARTMENT POSITIONS
+      // ════════════════════════════════════════════════════════
+      '/departments/{departmentId}/positions': {
+        get: {
+          tags: ['Department Positions'],
+          summary: 'List Positions',
+          description: 'Get all positions belonging to a department. Used to populate the position dropdown in employee creation/editing.',
+          security: [{ bearerAuth: [] }],
+          parameters: [{ name: 'departmentId', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: {
+            200: {
+              description: 'Position list',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean' },
+                      data: {
+                        type: 'object',
+                        properties: {
+                          positions: { type: 'array', items: { $ref: '#/components/schemas/Position' } },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        post: {
+          tags: ['Department Positions'],
+          summary: 'Create Position',
+          description: 'Create a new position in a department.',
+          security: [{ bearerAuth: [] }],
+          parameters: [{ name: 'departmentId', in: 'path', required: true, schema: { type: 'string' } }],
+          requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/CreatePositionRequest' } } } },
+          responses: {
+            201: { description: 'Position created', content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean' }, data: { $ref: '#/components/schemas/Position' } } } } } },
+            400: { description: 'Validation error — duplicate title or invalid data', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          },
+        },
+      },
+      '/departments/{departmentId}/positions/stats': {
+        get: {
+          tags: ['Department Positions'],
+          summary: 'Position Headcount Stats',
+          description: 'Return position-level headcount summary for a department.',
+          security: [{ bearerAuth: [] }],
+          parameters: [{ name: 'departmentId', in: 'path', required: true, schema: { type: 'string' } }],
+          responses: {
+            200: {
+              description: 'Position stats',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean' },
+                      data: {
+                        type: 'object',
+                        properties: {
+                          stats: { type: 'array', items: { $ref: '#/components/schemas/PositionStats' } },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/departments/{departmentId}/positions/{positionId}': {
+        put: {
+          tags: ['Department Positions'],
+          summary: 'Update Position',
+          description: 'Update a position (rename title, update description).',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            { name: 'departmentId', in: 'path', required: true, schema: { type: 'string' } },
+            { name: 'positionId', in: 'path', required: true, schema: { type: 'string' } },
+          ],
+          requestBody: { content: { 'application/json': { schema: { $ref: '#/components/schemas/CreatePositionRequest' } } } },
+          responses: {
+            200: { description: 'Position updated', content: { 'application/json': { schema: { type: 'object', properties: { success: { type: 'boolean' }, message: { type: 'string' }, data: { $ref: '#/components/schemas/Position' } } } } } },
+            404: { description: 'Position not found' },
+          },
+        },
+        delete: {
+          tags: ['Department Positions'],
+          summary: 'Delete Position',
+          description: 'Delete a position. Blocked if employees are actively assigned to it.',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            { name: 'departmentId', in: 'path', required: true, schema: { type: 'string' } },
+            { name: 'positionId', in: 'path', required: true, schema: { type: 'string' } },
+          ],
+          responses: {
+            200: { description: 'Position deleted' },
+            400: { description: 'Cannot delete — employees are assigned to this position', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+            404: { description: 'Position not found' },
+          },
         },
       },
 
