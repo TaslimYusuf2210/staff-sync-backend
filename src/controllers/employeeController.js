@@ -156,7 +156,7 @@ exports.create = async (req, res, next) => {
   try {
     const {
       firstName, lastName, email, phoneNumber, gender,
-      department: deptName, positionId, employmentType, hireDate, status,
+      department: deptName, position, employmentType, hireDate, status,
     } = req.body;
 
     // Validate required fields
@@ -166,7 +166,6 @@ exports.create = async (req, res, next) => {
     if (!phoneNumber || phoneNumber.length < 6) throw new AppError('Phone number must be at least 6 characters', 400);
     if (!gender) throw new AppError('Gender is required', 400);
     if (!['Male', 'Female', 'Other'].includes(gender)) throw new AppError('Gender must be Male, Female, or Other', 400);
-    if (!employmentType) throw new AppError('Employment type is required', 400);
     if (!employmentType) throw new AppError('Employment type is required', 400);
     if (!['Full-time', 'Part-time', 'Contract', 'Intern', 'Remote'].includes(employmentType)) {
       throw new AppError('Invalid employment type', 400);
@@ -193,14 +192,14 @@ exports.create = async (req, res, next) => {
       resolvedDepartmentId = dept.id;
 
       // Validate position exists in the selected department (optional)
-      if (positionId) {
-        const position = await Position.findOne({
-          where: { id: positionId, departmentId: dept.id },
+      if (position) {
+        const pos = await Position.findOne({
+          where: { id: position, departmentId: dept.id },
         });
-        if (!position) {
+        if (!pos) {
           throw new AppError('Selected position does not exist in this department', 400);
         }
-        resolvedPositionId = position.id;
+        resolvedPositionId = pos.id;
       }
     }
 
@@ -264,42 +263,42 @@ exports.update = async (req, res, next) => {
 
         if (departmentChanged) {
           // Position must be re-specified when department changes
-          if (!req.body.positionId) {
+          if (!req.body.position) {
             throw new AppError(
               'Department changed — position must be re-specified for the new department',
               400
             );
           }
           // Validate new position belongs to the new department
-          const newPosition = await Position.findOne({
-            where: { id: req.body.positionId, departmentId: dept.id },
+          const newPos = await Position.findOne({
+            where: { id: req.body.position, departmentId: dept.id },
           });
-          if (!newPosition) {
+          if (!newPos) {
             throw new AppError('Selected position does not exist in the new department', 400);
           }
-          updates.position = newPosition.id;
+          updates.position = newPos.id;
         }
       } else {
         // department explicitly set to empty/null — clear it
         updates.departmentId = null;
         updates.position = null;
       }
-    } else if (req.body.positionId !== undefined) {
-      if (req.body.positionId) {
+    } else if (req.body.position !== undefined) {
+      if (req.body.position) {
         // Position update without department change — validate position belongs to current department
         const currentDeptId = employee.departmentId;
         if (!currentDeptId) {
           throw new AppError('Cannot set position — employee has no department assigned', 400);
         }
-        const position = await Position.findOne({
-          where: { id: req.body.positionId, departmentId: currentDeptId },
+        const pos = await Position.findOne({
+          where: { id: req.body.position, departmentId: currentDeptId },
         });
-        if (!position) {
+        if (!pos) {
           throw new AppError('Selected position does not exist in this department', 400);
         }
-        updates.position = position.id;
+        updates.position = pos.id;
       } else {
-        // positionId explicitly set to empty/null — clear it
+        // position explicitly set to empty/null — clear it
         updates.position = null;
       }
     }

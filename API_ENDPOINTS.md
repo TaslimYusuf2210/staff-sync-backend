@@ -476,7 +476,7 @@ Register a new employee in the system.
   "phoneNumber": "+1 555 123 4567",
   "gender": "Male",
   "department": "Development",
-  "positionId": "uuid-of-software-engineer-position",
+  "position": "uuid-of-software-engineer-position",
   "employmentType": "Full-time",
   "hireDate": "2025-07-01",
   "status": "Active"
@@ -510,7 +510,7 @@ Register a new employee in the system.
 | phoneNumber | string | Required, min 6 characters |
 | gender | string | Required, one of: `Male`, `Female`, `Other` |
 | department | string | Optional, must match an existing department name |
-| positionId | string | Optional, must be a valid Position ID belonging to the selected department |
+| position | string | Optional, UUID of the Position (must belong to the selected department) |
 | employmentType | string | Required, one of: `Full-time`, `Part-time`, `Contract`, `Intern`, `Remote` |
 | hireDate | string | Optional, ISO date format (YYYY-MM-DD), defaults to today |
 | status | string | Optional, one of: `Active`, `Inactive`, `Probation`, `OnLeave`, `Resigned`, `Terminated`; defaults to `Active` |
@@ -536,7 +536,7 @@ Update one or more fields of an employee record. Supports partial updates.
   "address": "456 Oak St, New York, NY",
   "emergencyContact": "Jane Doe (+1 555 987 6542)",
   "department": "Design",
-  "positionId": "uuid-of-senior-ux-designer-position",
+  "position": "uuid-of-senior-ux-designer-position",
   "employmentType": "Full-time",
   "hireDate": "2024-06-01",
   "reportingManager": "Brooklyn Simmons",
@@ -545,7 +545,7 @@ Update one or more fields of an employee record. Supports partial updates.
 }
 ```
 
-> **Note:** If `department` is changed, `positionId` **must** also be provided — the position will be reset to match the new department's available positions. Setting `department` to `null` or empty clears both department and position.
+> **Note:** If `department` is changed, `position` **must** also be provided — the position will be reset to match the new department's available positions. Setting `department` to `null` or empty clears both department and position.
 
 **Success Response (200):**
 
@@ -1438,7 +1438,7 @@ Check if the API is running.
   "emergencyContact": "string (optional)",
   "department": "string (references Department.name, optional)",
   "position": "string (resolved position title from Position model, optional)",
-  "positionId": "string (UUID, FK to Position.id, optional)",
+  "positionId": "string (UUID, FK to Position.id, returned in responses)",
   "employmentType": "string (Full-time | Part-time | Contract | Intern | Remote)",
   "hireDate": "string (ISO date)",
   "reportingManager": "string (optional)",
@@ -1637,7 +1637,7 @@ Check if the API is running.
 >
 > - Employee IDs follow the format `EMP-YY-MM-SEQ`, Department IDs follow `ABB-YY-MM-SEQ`.
 > - The `department` field on an employee references `Department.name` (not the ID).
-> - `department` and `positionId` are optional on employee create/update. When department is provided, `GET /departments/:deptId/positions` can be used to populate the position dropdown.
+> - `department` and `position` are optional on employee create/update. When department is provided, `GET /departments/:deptId/positions` can be used to populate the position dropdown.
 > - If an employee's department is changed, the position **must be re-specified** (the old position likely doesn't exist in the new department).
 > - Deleting a position is **blocked** if employees are currently assigned to it.
 > - Deleting a department cascade-deletes all its positions.
