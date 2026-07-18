@@ -185,7 +185,7 @@ const options = {
         },
         CreateEmployeeRequest: {
           type: 'object',
-          required: ['firstName', 'lastName', 'email', 'phoneNumber', 'gender', 'department', 'positionId', 'employmentType', 'hireDate'],
+          required: ['firstName', 'lastName', 'email', 'phoneNumber', 'gender', 'employmentType'],
           properties: {
             firstName: { type: 'string', minLength: 2, example: 'John' },
             lastName: { type: 'string', minLength: 2, example: 'Doe' },
@@ -195,8 +195,8 @@ const options = {
             department: { type: 'string', example: 'Development' },
             positionId: { type: 'string', description: 'UUID of the Position (must belong to the selected department)' },
             employmentType: { type: 'string', enum: ['Full-time', 'Part-time', 'Contract', 'Intern', 'Remote'] },
-            hireDate: { type: 'string', format: 'date' },
-            status: { type: 'string', enum: ['Active', 'Inactive', 'Probation', 'Resigned', 'Terminated'] },
+            hireDate: { type: 'string', format: 'date', description: 'Defaults to today if not provided' },
+            status: { type: 'string', enum: ['Active', 'Inactive', 'Probation', 'OnLeave', 'Resigned', 'Terminated'], description: 'Defaults to Active if not provided' },
           },
         },
         Pagination: {

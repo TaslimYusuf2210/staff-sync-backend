@@ -509,11 +509,11 @@ Register a new employee in the system.
 | email | string | Required, valid email format |
 | phoneNumber | string | Required, min 6 characters |
 | gender | string | Required, one of: `Male`, `Female`, `Other` |
-| department | string | Required, must match an existing department name |
-| positionId | string | Required, must be a valid Position ID belonging to the selected department |
+| department | string | Optional, must match an existing department name |
+| positionId | string | Optional, must be a valid Position ID belonging to the selected department |
 | employmentType | string | Required, one of: `Full-time`, `Part-time`, `Contract`, `Intern`, `Remote` |
 | hireDate | string | Optional, ISO date format (YYYY-MM-DD), defaults to today |
-| status | string | Required, one of: `Active`, `Inactive`, `Probation`, `Resigned`, `Terminated` |
+| status | string | Optional, one of: `Active`, `Inactive`, `Probation`, `OnLeave`, `Resigned`, `Terminated`; defaults to `Active` |
 
 ---
 
@@ -545,7 +545,7 @@ Update one or more fields of an employee record. Supports partial updates.
 }
 ```
 
-> **Note:** If `department` is changed, `positionId` **must** also be provided — the position will be reset to match the new department's available positions.
+> **Note:** If `department` is changed, `positionId` **must** also be provided — the position will be reset to match the new department's available positions. Setting `department` to `null` or empty clears both department and position.
 
 **Success Response (200):**
 
@@ -1436,9 +1436,9 @@ Check if the API is running.
   "dob": "string (ISO date, optional)",
   "address": "string (optional)",
   "emergencyContact": "string (optional)",
-  "department": "string (references Department.name)",
-  "position": "string (resolved position title from Position model)",
-  "positionId": "string (UUID, FK to Position.id)",
+  "department": "string (references Department.name, optional)",
+  "position": "string (resolved position title from Position model, optional)",
+  "positionId": "string (UUID, FK to Position.id, optional)",
   "employmentType": "string (Full-time | Part-time | Contract | Intern | Remote)",
   "hireDate": "string (ISO date)",
   "reportingManager": "string (optional)",
@@ -1618,11 +1618,11 @@ Check if the API is running.
 | 21  | PUT    | `/departments/:id`                      | Update department              |
 | 22  | DELETE | `/departments/:id`                      | Delete department              |
 | 23  | GET    | `/departments/:deptId/positions`        | List department positions      |
-| 24  | POST   | `/departments/:deptId/positions`        | Create position in department      |
-| 25  | PUT    | `/departments/:deptId/positions/:posId` | Update position                    |
-| 26  | DELETE | `/departments/:deptId/positions/:posId` | Delete position                    |
-| 27  | GET    | `/departments/:deptId/positions/stats`  | Position headcount stats           |
-| 28  | GET    | `/dashboard/stats`                      | Dashboard overview statistics      |
+| 24  | POST   | `/departments/:deptId/positions`        | Create position in department  |
+| 25  | PUT    | `/departments/:deptId/positions/:posId` | Update position                |
+| 26  | DELETE | `/departments/:deptId/positions/:posId` | Delete position                |
+| 27  | GET    | `/departments/:deptId/positions/stats`  | Position headcount stats       |
+| 28  | GET    | `/dashboard/stats`                      | Dashboard overview statistics  |
 | 30  | GET    | `/reports/employee-summary`             | Employee summary report        |
 | 31  | GET    | `/reports/salary-summary`               | Salary/payroll report          |
 | 32  | GET    | `/reports/hiring-trend`                 | Hiring growth trend data       |
@@ -1637,7 +1637,7 @@ Check if the API is running.
 >
 > - Employee IDs follow the format `EMP-YY-MM-SEQ`, Department IDs follow `ABB-YY-MM-SEQ`.
 > - The `department` field on an employee references `Department.name` (not the ID).
-> - The `position` field on an employee is a **foreign key** (`positionId`) referencing `Position.id`. The frontend should call `GET /departments/:deptId/positions` after department selection to populate the position dropdown — no free-text input for position.
+> - `department` and `positionId` are optional on employee create/update. When department is provided, `GET /departments/:deptId/positions` can be used to populate the position dropdown.
 > - If an employee's department is changed, the position **must be re-specified** (the old position likely doesn't exist in the new department).
 > - Deleting a position is **blocked** if employees are currently assigned to it.
 > - Deleting a department cascade-deletes all its positions.
