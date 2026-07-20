@@ -476,7 +476,7 @@ Register a new employee in the system.
   "phoneNumber": "+1 555 123 4567",
   "gender": "Male",
   "department": "Development",
-  "position": "uuid-of-software-engineer-position",
+  "position": "Software Engineer",
   "employmentType": "Full-time",
   "hireDate": "2025-07-01",
   "status": "Active"
@@ -510,7 +510,7 @@ Register a new employee in the system.
 | phoneNumber | string | Required, min 6 characters |
 | gender | string | Required, one of: `Male`, `Female`, `Other` |
 | department | string | Optional, must match an existing department name |
-| position | string | Optional, UUID of the Position (must belong to the selected department) |
+| position | string | Optional, name of the Position (e.g. `"Software Engineer"`; must belong to the selected department) |
 | employmentType | string | Required, one of: `Full-time`, `Part-time`, `Contract`, `Intern`, `Remote` |
 | hireDate | string | Optional, ISO date format (YYYY-MM-DD), defaults to today |
 | status | string | Optional, one of: `Active`, `Inactive`, `Probation`, `OnLeave`, `Resigned`, `Terminated`; defaults to `Active` |
@@ -536,7 +536,7 @@ Update one or more fields of an employee record. Supports partial updates.
   "address": "456 Oak St, New York, NY",
   "emergencyContact": "Jane Doe (+1 555 987 6542)",
   "department": "Design",
-  "position": "uuid-of-senior-ux-designer-position",
+  "position": "Senior UX Designer",
   "employmentType": "Full-time",
   "hireDate": "2024-06-01",
   "reportingManager": "Brooklyn Simmons",

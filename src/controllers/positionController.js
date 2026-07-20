@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { Position, Department, Employee } = require('../models');
 const AppError = require('../utils/AppError');
+const { sequelize } = require('../config/database');
 
 const { v4: uuidv4 } = require('uuid');
 
@@ -51,7 +52,10 @@ exports.create = async (req, res, next) => {
     const existing = await Position.findOne({
       where: {
         departmentId: req.params.departmentId,
-        title: { [Op.like]: title.trim() },
+        title: sequelize.where(
+          sequelize.fn('LOWER', sequelize.col('title')),
+          title.trim().toLowerCase()
+        ),
       },
     });
     if (existing) {
@@ -107,7 +111,10 @@ exports.update = async (req, res, next) => {
       const duplicate = await Position.findOne({
         where: {
           departmentId: req.params.departmentId,
-          title: { [Op.like]: title.trim() },
+          title: sequelize.where(
+            sequelize.fn('LOWER', sequelize.col('title')),
+            title.trim().toLowerCase()
+          ),
           id: { [Op.ne]: req.params.positionId },
         },
       });

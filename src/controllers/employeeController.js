@@ -194,7 +194,7 @@ exports.create = async (req, res, next) => {
       // Validate position exists in the selected department (optional)
       if (position) {
         const pos = await Position.findOne({
-          where: { id: position, departmentId: dept.id },
+          where: { title: position, departmentId: dept.id },
         });
         if (!pos) {
           throw new AppError('Selected position does not exist in this department', 400);
@@ -223,7 +223,7 @@ exports.create = async (req, res, next) => {
         lastName: employee.lastName,
         email: employee.email,
         department: deptName,
-        position: position.title,
+        position: position || null,
         status: employee.status,
       },
     });
@@ -271,7 +271,7 @@ exports.update = async (req, res, next) => {
           }
           // Validate new position belongs to the new department
           const newPos = await Position.findOne({
-            where: { id: req.body.position, departmentId: dept.id },
+            where: { title: req.body.position, departmentId: dept.id },
           });
           if (!newPos) {
             throw new AppError('Selected position does not exist in the new department', 400);
@@ -291,7 +291,7 @@ exports.update = async (req, res, next) => {
           throw new AppError('Cannot set position — employee has no department assigned', 400);
         }
         const pos = await Position.findOne({
-          where: { id: req.body.position, departmentId: currentDeptId },
+          where: { title: req.body.position, departmentId: currentDeptId },
         });
         if (!pos) {
           throw new AppError('Selected position does not exist in this department', 400);
