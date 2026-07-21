@@ -322,8 +322,7 @@ exports.update = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'Employee updated successfully',
-      data: result,
+      data: { employee: result },
     });
   } catch (error) {
     next(error);
@@ -369,7 +368,6 @@ exports.updateSalary = async (req, res, next) => {
     res.json({
       success: true,
       data: {
-        id: employee.id,
         salary: {
           baseSalary: parseFloat(salary.baseSalary),
           bonus: parseFloat(salary.bonus),
@@ -403,7 +401,6 @@ exports.updateBank = async (req, res, next) => {
     res.json({
       success: true,
       data: {
-        id: employee.id,
         bankAccount: {
           bankName: bank.bankName,
           accountName: bank.accountName,
@@ -433,12 +430,14 @@ exports.addEducation = async (req, res, next) => {
     res.status(201).json({
       success: true,
       data: {
-        id: education.id,
-        institutionName: education.institutionName,
-        degree: education.degree,
-        qualification: education.qualification,
-        fieldOfStudy: education.fieldOfStudy,
-        graduationYear: education.graduationYear,
+        education: {
+          id: education.id,
+          institutionName: education.institutionName,
+          degree: education.degree,
+          qualification: education.qualification,
+          fieldOfStudy: education.fieldOfStudy,
+          graduationYear: education.graduationYear,
+        },
       },
     });
   } catch (error) {
@@ -459,7 +458,7 @@ exports.deleteEducation = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'Education record deleted',
+      message: 'Education record deleted successfully',
     });
   } catch (error) {
     next(error);
@@ -491,11 +490,13 @@ exports.addDocument = async (req, res, next) => {
     res.status(201).json({
       success: true,
       data: {
-        id: document.id,
-        name: document.name,
-        type: document.type,
-        uploadDate: document.uploadDate,
-        fileUrl: document.fileUrl,
+        document: {
+          id: document.id,
+          name: document.name,
+          type: document.type,
+          uploadDate: document.uploadDate,
+          fileUrl: document.fileUrl,
+        },
       },
     });
   } catch (error) {
@@ -516,7 +517,7 @@ exports.deleteDocument = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'Document deleted',
+      message: 'Document deleted successfully',
     });
   } catch (error) {
     next(error);
@@ -538,9 +539,11 @@ exports.addNote = async (req, res, next) => {
     res.status(201).json({
       success: true,
       data: {
-        id: note.id,
-        text: note.text,
-        createdDate: note.createdDate,
+        note: {
+          id: note.id,
+          text: note.text,
+          createdDate: note.createdDate,
+        },
       },
     });
   } catch (error) {
@@ -561,7 +564,7 @@ exports.deleteNote = async (req, res, next) => {
 
     res.json({
       success: true,
-      message: 'Note deleted',
+      message: 'Note deleted successfully',
     });
   } catch (error) {
     next(error);

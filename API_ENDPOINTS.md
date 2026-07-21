@@ -552,13 +552,14 @@ Update one or more fields of an employee record. Supports partial updates.
 ```json
 {
   "success": true,
-  "message": "Employee updated successfully",
   "data": {
-    "id": "EMP-26-07-002",
-    "firstName": "Jonathan",
-    "lastName": "Doe",
-    "email": "jonathan.doe@company.com",
-    "status": "Active"
+    "employee": {
+      "id": "EMP-26-07-002",
+      "firstName": "Jonathan",
+      "lastName": "Doe",
+      "email": "jonathan.doe@company.com",
+      "status": "Active"
+    }
   }
 }
 ```
@@ -613,7 +614,6 @@ Update an employee's compensation details.
 {
   "success": true,
   "data": {
-    "id": "EMP-26-07-001",
     "salary": {
       "baseSalary": 9500,
       "bonus": 2000,
@@ -647,7 +647,6 @@ Update an employee's bank details for payroll.
 {
   "success": true,
   "data": {
-    "id": "EMP-26-07-001",
     "bankAccount": {
       "bankName": "Chase Bank",
       "accountName": "Brooklyn Simmons",
@@ -683,12 +682,14 @@ Update an employee's bank details for payroll.
 {
   "success": true,
   "data": {
-    "id": "edu-3",
-    "institutionName": "MIT",
-    "degree": "Master of Computer Science",
-    "qualification": "M.CompSc",
-    "fieldOfStudy": "Artificial Intelligence",
-    "graduationYear": "2020"
+    "education": {
+      "id": "edu-3",
+      "institutionName": "MIT",
+      "degree": "Master of Computer Science",
+      "qualification": "M.CompSc",
+      "fieldOfStudy": "Artificial Intelligence",
+      "graduationYear": "2020"
+    }
   }
 }
 ```
@@ -702,7 +703,7 @@ Update an employee's bank details for payroll.
 ```json
 {
   "success": true,
-  "message": "Education record deleted"
+  "message": "Education record deleted successfully"
 }
 ```
 
@@ -729,11 +730,13 @@ Update an employee's bank details for payroll.
 {
   "success": true,
   "data": {
-    "id": "doc-5",
-    "name": "Contract_Signed.pdf",
-    "type": "Employment Letter",
-    "uploadDate": "2025-07-01",
-    "fileUrl": "https://cdn.staffsync.com/documents/doc-5.pdf"
+    "document": {
+      "id": "doc-5",
+      "name": "Contract_Signed.pdf",
+      "type": "Employment Letter",
+      "uploadDate": "2025-07-01",
+      "fileUrl": "https://cdn.staffsync.com/documents/doc-5.pdf"
+    }
   }
 }
 ```
@@ -747,7 +750,7 @@ Update an employee's bank details for payroll.
 ```json
 {
   "success": true,
-  "message": "Document deleted"
+  "message": "Document deleted successfully"
 }
 ```
 
@@ -773,9 +776,11 @@ Update an employee's bank details for payroll.
 {
   "success": true,
   "data": {
-    "id": "n-15",
-    "text": "Employee is performing exceptionally well this quarter.",
-    "createdDate": "2025-07-01"
+    "note": {
+      "id": "n-15",
+      "text": "Employee is performing exceptionally well this quarter.",
+      "createdDate": "2025-07-01"
+    }
   }
 }
 ```
@@ -789,7 +794,7 @@ Update an employee's bank details for payroll.
 ```json
 {
   "success": true,
-  "message": "Note deleted"
+  "message": "Note deleted successfully"
 }
 ```
 
