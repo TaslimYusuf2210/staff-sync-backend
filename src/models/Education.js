@@ -12,10 +12,6 @@ const Education = sequelize.define('Education', {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  degree: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
   qualification: {
     type: DataTypes.STRING,
     allowNull: false,

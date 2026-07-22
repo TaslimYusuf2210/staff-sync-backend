@@ -215,8 +215,7 @@ const options = {
           properties: {
             id: { type: 'string', example: 'edu-1' },
             institutionName: { type: 'string', example: 'MIT' },
-            degree: { type: 'string', example: 'Master of Computer Science' },
-            qualification: { type: 'string', example: 'M.CompSc' },
+            qualification: { type: 'string', example: 'M.Sc.' },
             fieldOfStudy: { type: 'string', example: 'Artificial Intelligence' },
             graduationYear: { type: 'string', example: '2020' },
           },

@@ -420,10 +420,10 @@ exports.addEducation = async (req, res, next) => {
     const employee = await Employee.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!employee) throw new AppError('Employee not found', 404);
 
-    const { institutionName, degree, qualification, fieldOfStudy, graduationYear } = req.body;
+    const { institutionName, qualification, fieldOfStudy, graduationYear } = req.body;
 
     const education = await Education.create({
-      institutionName, degree, qualification, fieldOfStudy, graduationYear,
+      institutionName, qualification, fieldOfStudy, graduationYear,
       employeeId: employee.id,
     });
 
@@ -433,7 +433,6 @@ exports.addEducation = async (req, res, next) => {
         education: {
           id: education.id,
           institutionName: education.institutionName,
-          degree: education.degree,
           qualification: education.qualification,
           fieldOfStudy: education.fieldOfStudy,
           graduationYear: education.graduationYear,

@@ -225,9 +225,9 @@ const seed = async () => {
   });
 
   // ── Education ──────────────────────────────────────────────
+  // Map old degree into qualification (migration: degree → qualification)
   await Education.create({
     institutionName: 'Chicago Art Institute',
-    degree: 'Bachelor of Fine Arts',
     qualification: 'BFA',
     fieldOfStudy: 'Graphic Design',
     graduationYear: '2014',

@@ -410,7 +410,6 @@ Get full employee profile including all nested data.
         {
           "id": "edu-1",
           "institutionName": "Chicago Art Institute",
-          "degree": "Bachelor of Fine Arts",
           "qualification": "BFA",
           "fieldOfStudy": "Graphic Design",
           "graduationYear": "2014"
@@ -669,8 +668,7 @@ Update an employee's bank details for payroll.
 ```json
 {
   "institutionName": "MIT",
-  "degree": "Master of Computer Science",
-  "qualification": "M.CompSc",
+  "qualification": "M.Sc.",
   "fieldOfStudy": "Artificial Intelligence",
   "graduationYear": "2020"
 }
@@ -685,8 +683,7 @@ Update an employee's bank details for payroll.
     "education": {
       "id": "edu-3",
       "institutionName": "MIT",
-      "degree": "Master of Computer Science",
-      "qualification": "M.CompSc",
+      "qualification": "M.Sc.",
       "fieldOfStudy": "Artificial Intelligence",
       "graduationYear": "2020"
     }
@@ -1497,8 +1494,7 @@ Check if the API is running.
 {
   "id": "string (auto-generated, format: edu-xxx)",
   "institutionName": "string",
-  "degree": "string",
-  "qualification": "string",
+  "qualification": "string (abbreviation, e.g. \"B.Sc.\", \"RN\", \"HND\", \"NCE\")",
   "fieldOfStudy": "string",
   "graduationYear": "string (year)"
 }
