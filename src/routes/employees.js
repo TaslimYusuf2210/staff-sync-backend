@@ -1,7 +1,6 @@
 const { Router } = require('express');
 const employeeController = require('../controllers/employeeController');
 const authenticate = require('../middleware/auth');
-const upload = require('../middleware/upload');
 
 const router = Router();
 
@@ -22,7 +21,8 @@ router.put('/:id/bank', employeeController.updateBank);
 router.post('/:id/education', employeeController.addEducation);
 router.delete('/:id/education/:educationId', employeeController.deleteEducation);
 
-router.post('/:id/documents', upload.single('file'), employeeController.addDocument);
+router.post('/:id/documents', employeeController.addDocument);
+router.get('/:id/documents/:documentId/download', employeeController.downloadDocument);
 router.delete('/:id/documents/:documentId', employeeController.deleteDocument);
 
 router.post('/:id/notes', employeeController.addNote);

@@ -471,13 +471,10 @@ exports.addDocument = async (req, res, next) => {
     const employee = await Employee.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!employee) throw new AppError('Employee not found', 404);
 
-    if (!req.file) throw new AppError('File is required', 400);
-
-    const { name, type } = req.body;
+    const { name, type, fileUrl } = req.body;
     if (!name) throw new AppError('Document name is required', 400);
     if (!type) throw new AppError('Document type is required', 400);
-
-    const fileUrl = `/uploads/${req.body.directory || 'documents'}/${req.file.filename}`;
+    if (!fileUrl) throw new AppError('fileUrl is required — upload the file to a cloud service and provide the URL', 400);
 
     const document = await Document.create({
       name,
@@ -518,6 +515,41 @@ exports.deleteDocument = async (req, res, next) => {
       success: true,
       message: 'Document deleted successfully',
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── 2.9.3 Download Document (proxy from Cloudinary) ────────
+
+exports.downloadDocument = async (req, res, next) => {
+  try {
+    const employee = await Employee.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
+    if (!employee) throw new AppError('Employee not found', 404);
+
+    const document = await Document.findOne({
+      where: { id: req.params.documentId, employeeId: req.params.id },
+    });
+    if (!document) throw new AppError('Document not found', 404);
+    if (!document.fileUrl) throw new AppError('Document has no file URL', 404);
+
+    const response = await fetch(document.fileUrl);
+    if (!response.ok) {
+      throw new AppError('Failed to fetch file from storage', 500);
+    }
+
+    const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    const contentLength = response.headers.get('content-length');
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${document.name}"`);
+    if (contentLength) {
+      res.setHeader('Content-Length', contentLength);
+    }
+
+    // Pipe the Cloudinary response to the client
+    const arrayBuffer = await response.arrayBuffer();
+    res.send(Buffer.from(arrayBuffer));
   } catch (error) {
     next(error);
   }

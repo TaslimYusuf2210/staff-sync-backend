@@ -39,19 +39,6 @@ const config = {
     fromEmail: process.env.BREVO_FROM_EMAIL || 'noreply@staffsync.com',
   },
 
-  // Upload
-  upload: {
-    maxFileSize: 10 * 1024 * 1024, // 10MB
-    allowedMimeTypes: [
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'image/png',
-      'image/jpeg',
-      'image/gif',
-    ],
-    uploadDir: path.resolve(__dirname, '../../uploads'),
-  },
 };
 
 module.exports = config;

@@ -3,7 +3,7 @@
 > **Project:** StaffSync Employee Management Dashboard  
 > **Base URL:** `https://api.staffsync.com/v1`  
 > **Auth:** All endpoints except `/auth/*` require a `Bearer <token>` header.  
-> **Content-Type:** `application/json` (unless file upload)
+> **Content-Type:** `application/json`
 
 ---
 
@@ -16,9 +16,8 @@
 5. [Dashboard](#5-dashboard)
 6. [Reports](#6-reports)
 7. [Settings](#7-settings)
-8. [File Uploads](#8-file-uploads)
-9. [Health](#10-health)
-10. [Data Models](#11-data-models)
+8. [Health](#8-health)
+9. [Data Models](#9-data-models)
 
 ---
 
@@ -712,14 +711,25 @@ Update an employee's bank details for payroll.
 
 **`POST /employees/:id/documents`**
 
-> **Content-Type:** `multipart/form-data`
+> **Content-Type:** `application/json`
+> **Note:** Upload the file to Cloudinary (or similar) from the frontend first, then send the returned URL here.
 
-**Form Fields:**
+**Request Body:**
+
+```json
+{
+  "name": "Resume 2026.pdf",
+  "type": "Resume",
+  "fileUrl": "https://res.cloudinary.com/your-cloud/image/upload/v1/documents/abc123.pdf"
+}
+```
+
+**Validation:**
 | Field | Type | Rules |
-|-------|--------|---------------------------------------------|
-| file | File | Required, PDF or image, max 10MB |
+|-------|------|-------|
 | name | string | Required, document display name |
 | type | string | Required: `Resume`, `Employment Letter`, `Certificates`, `Other Documents` |
+| fileUrl | string | Required, the URL returned from your cloud upload service |
 
 **Success Response (201):**
 
@@ -729,10 +739,10 @@ Update an employee's bank details for payroll.
   "data": {
     "document": {
       "id": "doc-5",
-      "name": "Contract_Signed.pdf",
-      "type": "Employment Letter",
+      "name": "Resume 2026.pdf",
+      "type": "Resume",
       "uploadDate": "2025-07-01",
-      "fileUrl": "https://cdn.staffsync.com/documents/doc-5.pdf"
+      "fileUrl": "https://res.cloudinary.com/your-cloud/image/upload/v1/documents/abc123.pdf"
     }
   }
 }
@@ -748,6 +758,50 @@ Update an employee's bank details for payroll.
 {
   "success": true,
   "message": "Document deleted successfully"
+}
+```
+
+#### 2.9.3 Download Document
+
+Proxy a document file from Cloudinary and return it as a download.
+
+**`GET /employees/:id/documents/:documentId/download`**
+
+**Success Response (200):**
+
+The file is returned as a binary download with the following headers:
+- `Content-Type: application/pdf` (or the file's actual MIME type)
+- `Content-Disposition: attachment; filename="{document.name}"`
+
+**Error Response (404):**
+
+```json
+{
+  "success": false,
+  "message": "Employee not found"
+}
+```
+
+```json
+{
+  "success": false,
+  "message": "Document not found"
+}
+```
+
+```json
+{
+  "success": false,
+  "message": "Document has no file URL"
+}
+```
+
+**Error Response (500):**
+
+```json
+{
+  "success": false,
+  "message": "Failed to fetch file from storage"
 }
 ```
 
@@ -1369,40 +1423,7 @@ Returns the file as a downloadable binary stream with appropriate `Content-Type`
 
 ---
 
-## 8. File Uploads
-
-### 8.1 Upload File
-
-Upload employee documents, profile photos, or any attachment.
-
-**`POST /upload`**
-
-> **Content-Type:** `multipart/form-data`
-
-**Form Fields:**
-| Field | Type | Rules |
-|-----------|--------|------------------------------------------------------|
-| file | File | Required. Max 10MB. Allowed: PDF, DOC, DOCX, PNG, JPG, JPEG, GIF |
-| directory | string | Optional. Target folder: `documents`, `photos`, `general`. Default: `general` |
-
-**Success Response (201):**
-
-```json
-{
-  "success": true,
-  "data": {
-    "fileUrl": "https://cdn.staffsync.com/uploads/doc-5.pdf",
-    "fileName": "Contract_Signed.pdf",
-    "fileSize": 245000,
-    "mimeType": "application/pdf",
-    "uploadDate": "2025-07-01T10:30:00Z"
-  }
-}
-```
-
----
-
-## 10. Health
+## 8. Health
 
 ### 10.1 Health Check
 
@@ -1423,7 +1444,7 @@ Check if the API is running.
 
 ---
 
-## 11. Data Models
+## 9. Data Models
 
 ### Employee
 
@@ -1609,8 +1630,9 @@ Check if the API is running.
 | 11  | PUT    | `/employees/:id/bank`                   | Update bank account            |
 | 12  | POST   | `/employees/:id/education`              | Add education record           |
 | 13  | DELETE | `/employees/:id/education/:eduId`       | Delete education record        |
-| 14  | POST   | `/employees/:id/documents`              | Upload document                |
-| 15  | DELETE | `/employees/:id/documents/:docId`       | Delete document                |
+| 14  | POST   | `/employees/:id/documents`              | Add document (send fileUrl)    |
+| 15  | GET    | `/employees/:id/documents/:docId/download` | Download document (proxy from Cloudinary) |
+| 16  | DELETE | `/employees/:id/documents/:docId`       | Delete document                |
 | 16  | POST   | `/employees/:id/notes`                  | Add note                       |
 | 17  | DELETE | `/employees/:id/notes/:noteId`          | Delete note                    |
 | 18  | GET    | `/departments`                          | List departments               |
@@ -1630,7 +1652,7 @@ Check if the API is running.
 | 33  | GET    | `/reports/export`                       | Export report as CSV/Excel/PDF |
 | 34  | GET    | `/settings`                             | Get company settings           |
 | 35  | PUT    | `/settings/company`                     | Update company info            |
-| 36  | POST   | `/upload`                               | Upload file (documents/photos) |
+
 
 ---
 
@@ -1643,7 +1665,8 @@ Check if the API is running.
 > - Deleting a position is **blocked** if employees are currently assigned to it.
 > - Deleting a department cascade-deletes all its positions.
 > - The `photoUrl` on employees can be a file upload URL or an external URL (e.g., from Unsplash).
-> - Document uploads will likely require file storage integration (S3, Cloudinary, etc.).
+> - File uploads are handled client-side (Cloudinary or similar). The backend only stores the URL string.
+> - Use the frontend helper `uploadImageToCloudinary(file)` to upload, then send the returned `secure_url` to the backend.
 > - The `reports/export` endpoint should stream the file for download.
 > - Pagination metadata (`page`, `limit`, `totalItems`, `totalPages`) is expected on all list endpoints.
 > - All timestamps should be in ISO 8601 format (UTC).

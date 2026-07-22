@@ -23,10 +23,6 @@ app.use(cors({ origin: config.cors.origin }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// ─── Static Files (for uploads) ──────────────────────────────
-
-app.use('/uploads', express.static(config.upload.uploadDir));
-
 // ─── Swagger Docs ────────────────────────────────────────────
 
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {

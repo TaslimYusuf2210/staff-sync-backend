@@ -637,24 +637,42 @@ const options = {
         post: {
           tags: ['Employees - Documents'],
           summary: 'Add Document',
+          description: 'Accepts a fileUrl — upload the file to Cloudinary (or similar) from the frontend first, then send the returned URL here.',
           security: [{ bearerAuth: [] }],
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
           requestBody: {
             content: {
-              'multipart/form-data': {
+              'application/json': {
                 schema: {
                   type: 'object',
                   properties: {
-                    file: { type: 'string', format: 'binary', description: 'PDF or image, max 10MB' },
                     name: { type: 'string', description: 'Document display name' },
                     type: { type: 'string', enum: ['Resume', 'Employment Letter', 'Certificates', 'Other Documents'] },
+                    fileUrl: { type: 'string', description: 'Cloudinary URL of the uploaded file' },
                   },
-                  required: ['file', 'name', 'type'],
+                  required: ['name', 'type', 'fileUrl'],
                 },
               },
             },
           },
           responses: { 201: { description: 'Document added' } },
+        },
+      },
+      '/employees/{id}/documents/{documentId}/download': {
+        get: {
+          tags: ['Employees - Documents'],
+          summary: 'Download Document',
+          description: 'Proxies the file from Cloudinary and returns it as a download attachment.',
+          security: [{ bearerAuth: [] }],
+          parameters: [
+            { name: 'id', in: 'path', required: true, schema: { type: 'string' } },
+            { name: 'documentId', in: 'path', required: true, schema: { type: 'string' } },
+          ],
+          responses: {
+            200: { description: 'File streamed as download' },
+            404: { description: 'Employee or document not found' },
+            500: { description: 'Failed to fetch file from storage' },
+          },
         },
       },
       '/employees/{id}/documents/{documentId}': {
@@ -959,32 +977,7 @@ const options = {
         },
       },
 
-      // ════════════════════════════════════════════════════════
-      // UPLOAD
-      // ════════════════════════════════════════════════════════
-      '/upload': {
-        post: {
-          tags: ['Upload'],
-          summary: 'Upload File',
-          description: 'Upload employee documents, profile photos, or any attachment.',
-          security: [{ bearerAuth: [] }],
-          requestBody: {
-            content: {
-              'multipart/form-data': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    file: { type: 'string', format: 'binary', description: 'Max 10MB. PDF, DOC, DOCX, PNG, JPG, JPEG, GIF' },
-                    directory: { type: 'string', enum: ['documents', 'photos', 'general'], default: 'general' },
-                  },
-                  required: ['file'],
-                },
-              },
-            },
-          },
-          responses: { 201: { description: 'File uploaded' } },
-        },
-      },
+
 
       // ════════════════════════════════════════════════════════
       // HEALTH
