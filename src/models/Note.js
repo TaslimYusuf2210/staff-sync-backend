@@ -8,6 +8,10 @@ const Note = sequelize.define('Note', {
     primaryKey: true,
     defaultValue: () => generateId('n'),
   },
+  title: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   text: {
     type: DataTypes.TEXT,
     allowNull: false,

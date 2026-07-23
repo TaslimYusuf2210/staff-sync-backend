@@ -562,16 +562,18 @@ exports.addNote = async (req, res, next) => {
     const employee = await Employee.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!employee) throw new AppError('Employee not found', 404);
 
-    const { text } = req.body;
+    const { title, text } = req.body;
+    if (!title) throw new AppError('Note title is required', 400);
     if (!text) throw new AppError('Note text is required', 400);
 
-    const note = await Note.create({ text, employeeId: employee.id });
+    const note = await Note.create({ title, text, employeeId: employee.id });
 
     res.status(201).json({
       success: true,
       data: {
         note: {
           id: note.id,
+          title: note.title,
           text: note.text,
           createdDate: note.createdDate,
         },

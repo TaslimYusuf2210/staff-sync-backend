@@ -436,6 +436,7 @@ Get full employee profile including all nested data.
       "notes": [
         {
           "id": "n-1",
+          "title": "Creative Input",
           "text": "Brooklyn has outstanding creative inputs.",
           "createdDate": "2024-02-10"
         }
@@ -817,9 +818,16 @@ The file is returned as a binary download with the following headers:
 
 ```json
 {
+  "title": "Performance Note",
   "text": "Employee is performing exceptionally well this quarter."
 }
 ```
+
+**Validation:**
+| Field | Type | Rules |
+|-------|------|-------|
+| title | string | Required |
+| text | string | Required |
 
 **Success Response (201):**
 
@@ -829,6 +837,7 @@ The file is returned as a binary download with the following headers:
   "data": {
     "note": {
       "id": "n-15",
+      "title": "Performance Note",
       "text": "Employee is performing exceptionally well this quarter.",
       "createdDate": "2025-07-01"
     }
@@ -1558,6 +1567,7 @@ Check if the API is running.
 ```json
 {
   "id": "string (auto-generated, format: n-xxx)",
+  "title": "string",
   "text": "string",
   "createdDate": "string (ISO date)"
 }

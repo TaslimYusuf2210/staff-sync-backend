@@ -258,6 +258,7 @@ const options = {
           type: 'object',
           properties: {
             id: { type: 'string', example: 'n-1' },
+            title: { type: 'string', example: 'Performance Note' },
             text: { type: 'string', example: 'Employee is performing exceptionally well.' },
             createdDate: { type: 'string', format: 'date', example: '2025-07-01' },
           },
@@ -693,7 +694,7 @@ const options = {
           summary: 'Add Note',
           security: [{ bearerAuth: [] }],
           parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
-          requestBody: { content: { 'application/json': { schema: { type: 'object', required: ['text'], properties: { text: { type: 'string' } } } } } },
+          requestBody: { content: { 'application/json': { schema: { type: 'object', required: ['title', 'text'], properties: { title: { type: 'string' }, text: { type: 'string' } } } } } },
           responses: { 201: { description: 'Note added' } },
         },
       },

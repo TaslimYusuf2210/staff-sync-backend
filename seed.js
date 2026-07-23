@@ -236,6 +236,7 @@ const seed = async () => {
 
   // ── Notes ──────────────────────────────────────────────────
   await Note.create({
+    title: 'Creative Input',
     text: 'Brooklyn has outstanding creative inputs.',
     employeeId: emp1.id,
   });
