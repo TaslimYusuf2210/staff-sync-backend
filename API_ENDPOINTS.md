@@ -711,8 +711,7 @@ Update an employee's bank details for payroll.
 
 **`POST /employees/:id/documents`**
 
-> **Content-Type:** `application/json`
-> **Note:** Upload the file to Cloudinary (or similar) from the frontend first, then send the returned URL here.
+> **Content-Type:** `application/json` > **Note:** Upload the file to Cloudinary (or similar) from the frontend first, then send the returned URL here.
 
 **Request Body:**
 
@@ -770,6 +769,7 @@ Proxy a document file from Cloudinary and return it as a download.
 **Success Response (200):**
 
 The file is returned as a binary download with the following headers:
+
 - `Content-Type: application/pdf` (or the file's actual MIME type)
 - `Content-Disposition: attachment; filename="{document.name}"`
 
@@ -1615,44 +1615,43 @@ Check if the API is running.
 
 ## Endpoints Summary
 
-| #   | Method | Endpoint                                | Description                    |
-| --- | ------ | --------------------------------------- | ------------------------------ |
-| 1   | POST   | `/auth/login`                           | User login                     |
-| 2   | POST   | `/auth/register`                        | Create account / register org  |
-| 3   | POST   | `/auth/forgot-password`                 | Request password reset         |
-| 4   | PUT    | `/auth/change-password`                 | Change password                |
-| 5   | GET    | `/employees`                            | List employees (paginated)     |
-| 6   | GET    | `/employees/:id`                        | Get employee full profile      |
-| 7   | POST   | `/employees`                            | Create new employee            |
-| 8   | PUT    | `/employees/:id`                        | Update employee                |
-| 9   | DELETE | `/employees/:id`                        | Delete employee                |
-| 10  | PUT    | `/employees/:id/salary`                 | Update salary                  |
-| 11  | PUT    | `/employees/:id/bank`                   | Update bank account            |
-| 12  | POST   | `/employees/:id/education`              | Add education record           |
-| 13  | DELETE | `/employees/:id/education/:eduId`       | Delete education record        |
-| 14  | POST   | `/employees/:id/documents`              | Add document (send fileUrl)    |
+| #   | Method | Endpoint                                   | Description                               |
+| --- | ------ | ------------------------------------------ | ----------------------------------------- |
+| 1   | POST   | `/auth/login`                              | User login                                |
+| 2   | POST   | `/auth/register`                           | Create account / register org             |
+| 3   | POST   | `/auth/forgot-password`                    | Request password reset                    |
+| 4   | PUT    | `/auth/change-password`                    | Change password                           |
+| 5   | GET    | `/employees`                               | List employees (paginated)                |
+| 6   | GET    | `/employees/:id`                           | Get employee full profile                 |
+| 7   | POST   | `/employees`                               | Create new employee                       |
+| 8   | PUT    | `/employees/:id`                           | Update employee                           |
+| 9   | DELETE | `/employees/:id`                           | Delete employee                           |
+| 10  | PUT    | `/employees/:id/salary`                    | Update salary                             |
+| 11  | PUT    | `/employees/:id/bank`                      | Update bank account                       |
+| 12  | POST   | `/employees/:id/education`                 | Add education record                      |
+| 13  | DELETE | `/employees/:id/education/:eduId`          | Delete education record                   |
+| 14  | POST   | `/employees/:id/documents`                 | Add document (send fileUrl)               |
 | 15  | GET    | `/employees/:id/documents/:docId/download` | Download document (proxy from Cloudinary) |
-| 16  | DELETE | `/employees/:id/documents/:docId`       | Delete document                |
-| 16  | POST   | `/employees/:id/notes`                  | Add note                       |
-| 17  | DELETE | `/employees/:id/notes/:noteId`          | Delete note                    |
-| 18  | GET    | `/departments`                          | List departments               |
-| 19  | GET    | `/departments/:id`                      | Get department + members       |
-| 20  | POST   | `/departments`                          | Create department              |
-| 21  | PUT    | `/departments/:id`                      | Update department              |
-| 22  | DELETE | `/departments/:id`                      | Delete department              |
-| 23  | GET    | `/departments/:deptId/positions`        | List department positions      |
-| 24  | POST   | `/departments/:deptId/positions`        | Create position in department  |
-| 25  | PUT    | `/departments/:deptId/positions/:posId` | Update position                |
-| 26  | DELETE | `/departments/:deptId/positions/:posId` | Delete position                |
-| 27  | GET    | `/departments/:deptId/positions/stats`  | Position headcount stats       |
-| 28  | GET    | `/dashboard/stats`                      | Dashboard overview statistics  |
-| 30  | GET    | `/reports/employee-summary`             | Employee summary report        |
-| 31  | GET    | `/reports/salary-summary`               | Salary/payroll report          |
-| 32  | GET    | `/reports/hiring-trend`                 | Hiring growth trend data       |
-| 33  | GET    | `/reports/export`                       | Export report as CSV/Excel/PDF |
-| 34  | GET    | `/settings`                             | Get company settings           |
-| 35  | PUT    | `/settings/company`                     | Update company info            |
-
+| 16  | DELETE | `/employees/:id/documents/:docId`          | Delete document                           |
+| 16  | POST   | `/employees/:id/notes`                     | Add note                                  |
+| 17  | DELETE | `/employees/:id/notes/:noteId`             | Delete note                               |
+| 18  | GET    | `/departments`                             | List departments                          |
+| 19  | GET    | `/departments/:id`                         | Get department + members                  |
+| 20  | POST   | `/departments`                             | Create department                         |
+| 21  | PUT    | `/departments/:id`                         | Update department                         |
+| 22  | DELETE | `/departments/:id`                         | Delete department                         |
+| 23  | GET    | `/departments/:deptId/positions`           | List department positions                 |
+| 24  | POST   | `/departments/:deptId/positions`           | Create position in department             |
+| 25  | PUT    | `/departments/:deptId/positions/:posId`    | Update position                           |
+| 26  | DELETE | `/departments/:deptId/positions/:posId`    | Delete position                           |
+| 27  | GET    | `/departments/:deptId/positions/stats`     | Position headcount stats                  |
+| 28  | GET    | `/dashboard/stats`                         | Dashboard overview statistics             |
+| 30  | GET    | `/reports/employee-summary`                | Employee summary report                   |
+| 31  | GET    | `/reports/salary-summary`                  | Salary/payroll report                     |
+| 32  | GET    | `/reports/hiring-trend`                    | Hiring growth trend data                  |
+| 33  | GET    | `/reports/export`                          | Export report as CSV/Excel/PDF            |
+| 34  | GET    | `/settings`                                | Get company settings                      |
+| 35  | PUT    | `/settings/company`                        | Update company info                       |
 
 ---
 
