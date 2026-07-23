@@ -10,6 +10,7 @@ router.use(authenticate);
 // ─── Department CRUD ────────────────────────────────────────
 
 router.get('/', departmentController.list);
+router.get('/employee-count', departmentController.employeeCount);
 router.get('/:id', departmentController.getById);
 router.post('/', departmentController.create);
 router.put('/:id', departmentController.update);

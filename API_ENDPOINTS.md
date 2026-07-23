@@ -1017,6 +1017,40 @@ Get department details and its members.
 }
 ```
 
+### 3.5 Employee Count by Department
+
+Returns department names with their total employee counts. Counts **all** employees — not filtered by salary assignment.
+
+**`GET /departments/employee-count`**
+
+**Success Response (200):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "departments": [
+      {
+        "department": "Design",
+        "employeeCount": 12
+      },
+      {
+        "department": "Development",
+        "employeeCount": 8
+      },
+      {
+        "department": "HR",
+        "employeeCount": 5
+      },
+      {
+        "department": "Marketing",
+        "employeeCount": 9
+      }
+    ]
+  }
+}
+```
+
 ---
 
 ### 3.6 List Department Positions
@@ -1254,6 +1288,8 @@ Get aggregate employee data for the reports page.
 
 **`GET /reports/employee-summary`**
 
+**Headers:** `Authorization: Bearer <token>`
+
 **Success Response (200):**
 
 ```json
@@ -1282,6 +1318,8 @@ Get aggregate employee data for the reports page.
 Get payroll and compensation data.
 
 **`GET /reports/salary-summary`**
+
+**Headers:** `Authorization: Bearer <token>`
 
 **Success Response (200):**
 
@@ -1318,10 +1356,11 @@ Get employee growth data over time.
 
 **`GET /reports/hiring-trend`**
 
+**Headers:** `Authorization: Bearer <token>`
+
 **Query Parameters:**
 | Parameter | Type | Default | Description |
 |-----------|--------|---------|------------------------------------------|
-| period | string | `monthly` | Aggregation period: `monthly`, `quarterly`, `yearly` |
 | months | integer | 12 | Number of months to look back |
 
 **Success Response (200):**
@@ -1330,28 +1369,76 @@ Get employee growth data over time.
 {
   "success": true,
   "data": {
-    "labels": ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan"],
-    "data": [28, 22, 24, 18, 14, 10, 5]
+    "labels": ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    "data": [3, 1, 0, 2, 4, 1, 5, 2, 3, 0, 1, 2]
   }
 }
 ```
+
+The `labels` array contains month abbreviations (e.g. `"Jan"`, `"Feb"`). The `data` array contains the number of employees hired in each corresponding month.
 
 ---
 
 ### 6.4 Export Reports
 
-Generate and download a report in the specified format.
+Download a report as a CSV file.
 
 **`GET /reports/export`**
+
+**Headers:** `Authorization: Bearer <token>`
 
 **Query Parameters:**
 | Parameter | Type | Default | Description |
 |-----------|--------|---------|------------------------------------------|
 | type | string | — | Report type: `employee-summary`, `salary-summary`, `hiring-trend` |
-| format | string | `csv` | Export format: `csv`, `xlsx`, `pdf` |
+| format | string | `csv` | Export format (currently only `csv` is supported) |
 
-**Success Response (200):**  
-Returns the file as a downloadable binary stream with appropriate `Content-Type` and `Content-Disposition` headers.
+**Success Response (200):**
+
+Returns the file as a downloadable CSV with these headers:
+
+| type | Content-Type | Content-Disposition | Example filename |
+|------|-------------|---------------------|------------------|
+| `employee-summary` | `text/csv` | `attachment` | `employee-summary-1712345678.csv` |
+| `salary-summary` | `text/csv` | `attachment` | `salary-summary-1712345678.csv` |
+| `hiring-trend` | `text/csv` | `attachment` | `hiring-trend-1712345678.csv` |
+
+**Example CSV output for `employee-summary`:**
+```csv
+ID,First Name,Last Name,Email,Department,Position,Status,Hire Date
+EMP-26-07-001,Brooklyn,Simmons,brok-simms@mail.com,Design,Creative Director,Active,2024-01-10
+EMP-26-07-002,Cody,Fisher,cody.fisher@mail.com,Development,Lead Developer,Active,2024-01-12
+```
+
+**Example CSV output for `salary-summary`:**
+```csv
+Employee ID,Name,Base Salary,Bonus,Allowances,Total
+EMP-26-07-001,Brooklyn Simmons,8500,1500,500,10500
+EMP-26-07-002,Cody Fisher,7200,1000,300,8500
+```
+
+**Example CSV output for `hiring-trend`:**
+```csv
+Period,Hires
+Jul 2025,3
+Aug 2025,1
+```
+
+**Error Response (400):**
+
+```json
+{
+  "success": false,
+  "message": "Report type is required"
+}
+```
+
+```json
+{
+  "success": false,
+  "message": "Invalid report type"
+}
+```
 
 ---
 
@@ -1646,7 +1733,8 @@ Check if the API is running.
 | 16  | POST   | `/employees/:id/notes`                     | Add note                                  |
 | 17  | DELETE | `/employees/:id/notes/:noteId`             | Delete note                               |
 | 18  | GET    | `/departments`                             | List departments                          |
-| 19  | GET    | `/departments/:id`                         | Get department + members                  |
+| 19  | GET    | `/departments/employee-count`              | Employee count by department              |
+| 20  | GET    | `/departments/:id`                         | Get department + members                  |
 | 20  | POST   | `/departments`                             | Create department                         |
 | 21  | PUT    | `/departments/:id`                         | Update department                         |
 | 22  | DELETE | `/departments/:id`                         | Delete department                         |

@@ -172,3 +172,42 @@ exports.remove = async (req, res, next) => {
     next(error);
   }
 };
+
+// ─── 3.6 Employee Count By Department ───────────────────────
+
+exports.employeeCount = async (req, res, next) => {
+  try {
+    const { fn, col } = require('sequelize');
+    const departments = await Department.findAll({
+      where: { companyId: req.user.companyId },
+      attributes: [
+        'name',
+        [fn('COUNT', col('Employees.id')), 'employeeCount'],
+      ],
+      include: [
+        {
+          model: Employee,
+          as: 'Employees',
+          attributes: [],
+          where: { companyId: req.user.companyId },
+        },
+      ],
+      group: ['Department.id', 'Department.name'],
+      order: [['name', 'ASC']],
+      raw: true,
+      nest: true,
+    });
+
+    res.json({
+      success: true,
+      data: {
+        departments: departments.map((d) => ({
+          department: d.name,
+          employeeCount: parseInt(d.employeeCount, 10) || 0,
+        })),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

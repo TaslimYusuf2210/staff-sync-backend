@@ -306,6 +306,85 @@ const options = {
           },
         },
 
+        // ─── Report: Employee Summary ──────────────────────
+        EmployeeSummaryResponse: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: true },
+            data: {
+              type: 'object',
+              properties: {
+                totalEmployees: { type: 'integer', example: 34 },
+                activeEmployees: { type: 'integer', example: 28 },
+                inactiveEmployees: { type: 'integer', example: 6 },
+                totalDepartments: { type: 'integer', example: 4 },
+                employeesPerDepartment: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      department: { type: 'string', example: 'Design' },
+                      count: { type: 'integer', example: 12 },
+                      percentage: { type: 'number', example: 35.3 },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        // ─── Report: Salary Summary ────────────────────────
+        SalarySummaryResponse: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: true },
+            data: {
+              type: 'object',
+              properties: {
+                totalMonthlyPayroll: { type: 'number', example: 245000 },
+                averageCompensation: { type: 'number', example: 7205 },
+                highestPaid: { type: 'number', example: 10500 },
+                salaryDistributionByDepartment: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      department: { type: 'string', example: 'Design' },
+                      averageSalary: { type: 'number', example: 8200 },
+                      totalPayroll: { type: 'number', example: 98400 },
+                      employeeCount: { type: 'integer', example: 12 },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        // ─── Report: Hiring Trend ──────────────────────────
+        HiringTrendResponse: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean', example: true },
+            data: {
+              type: 'object',
+              properties: {
+                labels: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  example: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                },
+                data: {
+                  type: 'array',
+                  items: { type: 'integer' },
+                  example: [3, 1, 0, 2, 4, 1, 5, 2, 3, 0, 1, 2],
+                },
+              },
+            },
+          },
+        },
+
         // ─── Position ───────────────────────────────────────
         Position: {
           type: 'object',
@@ -730,6 +809,44 @@ const options = {
           responses: { 201: { description: 'Department created' } },
         },
       },
+      '/departments/employee-count': {
+        get: {
+          tags: ['Departments'],
+          summary: 'Employee Count by Department',
+          description: 'Returns department names with their total employee counts. Counts all employees — not filtered by salary assignment.',
+          security: [{ bearerAuth: [] }],
+          responses: {
+            200: {
+              description: 'Employee counts per department',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      success: { type: 'boolean', example: true },
+                      data: {
+                        type: 'object',
+                        properties: {
+                          departments: {
+                            type: 'array',
+                            items: {
+                              type: 'object',
+                              properties: {
+                                department: { type: 'string', example: 'Design' },
+                                employeeCount: { type: 'integer', example: 12 },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
       '/departments/{id}': {
         get: {
           tags: ['Departments'],
@@ -917,7 +1034,12 @@ const options = {
           tags: ['Reports'],
           summary: 'Employee Summary Report',
           security: [{ bearerAuth: [] }],
-          responses: { 200: { description: 'Employee summary data' } },
+          responses: {
+            200: {
+              description: 'Employee summary data',
+              content: { 'application/json': { schema: { $ref: '#/components/schemas/EmployeeSummaryResponse' } } },
+            },
+          },
         },
       },
       '/reports/salary-summary': {
@@ -926,7 +1048,12 @@ const options = {
           summary: 'Salary Summary Report',
           description: 'Get payroll and compensation data.',
           security: [{ bearerAuth: [] }],
-          responses: { 200: { description: 'Salary summary data' } },
+          responses: {
+            200: {
+              description: 'Salary summary data',
+              content: { 'application/json': { schema: { $ref: '#/components/schemas/SalarySummaryResponse' } } },
+            },
+          },
         },
       },
       '/reports/hiring-trend': {
@@ -936,23 +1063,30 @@ const options = {
           description: 'Get employee growth data over time.',
           security: [{ bearerAuth: [] }],
           parameters: [
-            { name: 'period', in: 'query', schema: { type: 'string', enum: ['monthly', 'quarterly', 'yearly'], default: 'monthly' } },
             { name: 'months', in: 'query', schema: { type: 'integer', default: 12 }, description: 'Number of months to look back' },
           ],
-          responses: { 200: { description: 'Hiring trend data' } },
+          responses: {
+            200: {
+              description: 'Hiring trend data',
+              content: { 'application/json': { schema: { $ref: '#/components/schemas/HiringTrendResponse' } } },
+            },
+          },
         },
       },
       '/reports/export': {
         get: {
           tags: ['Reports'],
           summary: 'Export Reports',
-          description: 'Generate and download a report in CSV format.',
+          description: 'Download a report as a CSV file.',
           security: [{ bearerAuth: [] }],
           parameters: [
             { name: 'type', in: 'query', required: true, schema: { type: 'string', enum: ['employee-summary', 'salary-summary', 'hiring-trend'] } },
-            { name: 'format', in: 'query', schema: { type: 'string', enum: ['csv', 'xlsx', 'pdf'], default: 'csv' } },
+            { name: 'format', in: 'query', schema: { type: 'string', enum: ['csv'], default: 'csv' } },
           ],
-          responses: { 200: { description: 'File download' } },
+          responses: {
+            200: { description: 'CSV file download with Content-Type: text/csv and Content-Disposition: attachment' },
+            400: { description: 'Invalid or missing report type', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+          },
         },
       },
 
