@@ -1369,7 +1369,20 @@ Get employee growth data over time.
 {
   "success": true,
   "data": {
-    "labels": ["Jul", "Aug", "Sep", "Oct", "Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+    "labels": [
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun"
+    ],
     "data": [3, 1, 0, 2, 4, 1, 5, 2, 3, 0, 1, 2]
   }
 }
@@ -1397,13 +1410,14 @@ Download a report as a CSV file.
 
 Returns the file as a downloadable CSV with these headers:
 
-| type | Content-Type | Content-Disposition | Example filename |
-|------|-------------|---------------------|------------------|
-| `employee-summary` | `text/csv` | `attachment` | `employee-summary-1712345678.csv` |
-| `salary-summary` | `text/csv` | `attachment` | `salary-summary-1712345678.csv` |
-| `hiring-trend` | `text/csv` | `attachment` | `hiring-trend-1712345678.csv` |
+| type               | Content-Type | Content-Disposition | Example filename                  |
+| ------------------ | ------------ | ------------------- | --------------------------------- |
+| `employee-summary` | `text/csv`   | `attachment`        | `employee-summary-1712345678.csv` |
+| `salary-summary`   | `text/csv`   | `attachment`        | `salary-summary-1712345678.csv`   |
+| `hiring-trend`     | `text/csv`   | `attachment`        | `hiring-trend-1712345678.csv`     |
 
 **Example CSV output for `employee-summary`:**
+
 ```csv
 ID,First Name,Last Name,Email,Department,Position,Status,Hire Date
 EMP-26-07-001,Brooklyn,Simmons,brok-simms@mail.com,Design,Creative Director,Active,2024-01-10
@@ -1411,6 +1425,7 @@ EMP-26-07-002,Cody,Fisher,cody.fisher@mail.com,Development,Lead Developer,Active
 ```
 
 **Example CSV output for `salary-summary`:**
+
 ```csv
 Employee ID,Name,Base Salary,Bonus,Allowances,Total
 EMP-26-07-001,Brooklyn Simmons,8500,1500,500,10500
@@ -1418,6 +1433,7 @@ EMP-26-07-002,Cody Fisher,7200,1000,300,8500
 ```
 
 **Example CSV output for `hiring-trend`:**
+
 ```csv
 Period,Hires
 Jul 2025,3

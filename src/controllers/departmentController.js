@@ -178,8 +178,10 @@ exports.remove = async (req, res, next) => {
 exports.employeeCount = async (req, res, next) => {
   try {
     const { fn, col } = require('sequelize');
+    const companyId = req.user.companyId;
+
     const departments = await Department.findAll({
-      where: { companyId: req.user.companyId },
+      where: { companyId },
       attributes: [
         'name',
         [fn('COUNT', col('Employees.id')), 'employeeCount'],
@@ -189,7 +191,7 @@ exports.employeeCount = async (req, res, next) => {
           model: Employee,
           as: 'Employees',
           attributes: [],
-          where: { companyId: req.user.companyId },
+          where: { companyId },
         },
       ],
       group: ['Department.id', 'Department.name'],
@@ -198,14 +200,26 @@ exports.employeeCount = async (req, res, next) => {
       nest: true,
     });
 
+    const result = departments.map((d) => ({
+      department: d.name,
+      employeeCount: parseInt(d.employeeCount, 10) || 0,
+    }));
+
+    // Count employees without a department
+    const noDeptCount = await Employee.count({
+      where: { departmentId: null, companyId },
+    });
+
+    if (noDeptCount > 0) {
+      result.push({
+        department: 'Others',
+        employeeCount: noDeptCount,
+      });
+    }
+
     res.json({
       success: true,
-      data: {
-        departments: departments.map((d) => ({
-          department: d.name,
-          employeeCount: parseInt(d.employeeCount, 10) || 0,
-        })),
-      },
+      data: { departments: result },
     });
   } catch (error) {
     next(error);

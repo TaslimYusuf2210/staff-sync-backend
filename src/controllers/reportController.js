@@ -67,7 +67,7 @@ exports.salarySummary = async (req, res, next) => {
       const total = base + bonus + allowances;
       totalMonthlyPayroll += total;
 
-      const deptName = s.Employee?.Department?.name || 'Unknown';
+      const deptName = s.Employee?.Department?.name || 'Others';
       if (!deptMap[deptName]) {
         deptMap[deptName] = { totalPayroll: 0, count: 0 };
       }
