@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const { Employee, Department, Position, Education, Salary, BankAccount, Document, Note } = require('../models');
 const AppError = require('../utils/AppError');
 const { generateEmployeeId } = require('../utils/generateId');
+const logActivity = require('../utils/activityLogger');
 
 // ─── Include helper ─────────────────────────────────────────
 
@@ -214,6 +215,12 @@ exports.create = async (req, res, next) => {
       companyId: req.user.companyId,
     });
 
+    await logActivity({
+      action: `You created employee ${employee.firstName} ${employee.lastName}`,
+      type: 'employee',
+      companyId: req.user.companyId,
+    });
+
     res.status(201).json({
       success: true,
       message: 'Employee created successfully',
@@ -336,7 +343,14 @@ exports.remove = async (req, res, next) => {
     const employee = await Employee.findOne({ where: { id: req.params.id, companyId: req.user.companyId } });
     if (!employee) throw new AppError('Employee not found', 404);
 
+    const { firstName, lastName } = employee;
     await employee.destroy();
+
+    await logActivity({
+      action: `You removed employee ${firstName} ${lastName}`,
+      type: 'employee_delete',
+      companyId: req.user.companyId,
+    });
 
     res.json({
       success: true,
@@ -364,6 +378,12 @@ exports.updateSalary = async (req, res, next) => {
     if (!created) {
       await salary.update({ baseSalary, bonus, allowances });
     }
+
+    await logActivity({
+      action: `You updated salary for ${employee.firstName} ${employee.lastName}`,
+      type: 'salary',
+      companyId: req.user.companyId,
+    });
 
     res.json({
       success: true,
@@ -427,6 +447,12 @@ exports.addEducation = async (req, res, next) => {
       employeeId: employee.id,
     });
 
+    await logActivity({
+      action: `You added an education record for ${employee.firstName} ${employee.lastName}`,
+      type: 'education',
+      companyId: req.user.companyId,
+    });
+
     res.status(201).json({
       success: true,
       data: {
@@ -481,6 +507,12 @@ exports.addDocument = async (req, res, next) => {
       type,
       fileUrl,
       employeeId: employee.id,
+    });
+
+    await logActivity({
+      action: `You uploaded a ${type} for ${employee.firstName} ${employee.lastName}`,
+      type: 'document',
+      companyId: req.user.companyId,
     });
 
     res.status(201).json({
@@ -567,6 +599,12 @@ exports.addNote = async (req, res, next) => {
     if (!text) throw new AppError('Note text is required', 400);
 
     const note = await Note.create({ title, text, employeeId: employee.id });
+
+    await logActivity({
+      action: `You added a note for ${employee.firstName} ${employee.lastName}`,
+      type: 'note',
+      companyId: req.user.companyId,
+    });
 
     res.status(201).json({
       success: true,

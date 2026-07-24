@@ -8,6 +8,7 @@ const Salary = require('./Salary');
 const BankAccount = require('./BankAccount');
 const Document = require('./Document');
 const Note = require('./Note');
+const Activity = require('./Activity');
 
 // ─── Associations ───────────────────────────────────────────
 
@@ -62,4 +63,5 @@ module.exports = {
   BankAccount,
   Document,
   Note,
+  Activity,
 };

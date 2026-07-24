@@ -1240,18 +1240,6 @@ Aggregated counts and metrics for the overview page.
     "inactiveEmployees": 6,
     "totalDepartments": 4,
     "newEmployeesThisMonth": 3,
-    "employeesByDepartment": [
-      {
-        "department": "Design",
-        "count": 12,
-        "percentage": 35.3
-      },
-      {
-        "department": "Development",
-        "count": 8,
-        "percentage": 23.5
-      }
-    ],
     "statusDistribution": {
       "active": 28,
       "inactive": 3,
@@ -1264,16 +1252,64 @@ Aggregated counts and metrics for the overview page.
         "id": "EMP-26-07-002",
         "firstName": "John",
         "lastName": "Doe",
+        "email": "john.doe@mail.com",
+        "phoneNumber": "+1 555 123 4567",
         "department": "Development",
         "position": "Software Engineer",
+        "employmentType": "Full-time",
+        "status": "Active",
         "hireDate": "2025-07-01",
         "photoUrl": null
       }
     ],
-    "growthTrend": {
-      "labels": ["Q1", "Q2", "Q3", "Q4"],
-      "data": [20, 25, 30, 34]
-    }
+    "departmentOverview": [
+      {
+        "id": "DES-26-07-001",
+        "name": "Design",
+        "abbreviation": "DES",
+        "employeeCount": 12,
+        "head": "Brooklyn Simmons"
+      },
+      {
+        "id": "DEV-26-07-001",
+        "name": "Development",
+        "abbreviation": "DEV",
+        "employeeCount": 8,
+        "head": "Cody Fisher"
+      }
+    ],
+    "recentActivity": [
+      {
+        "id": "act-001",
+        "action": "You added a note for Brooklyn Simmons",
+        "timestamp": "2 hours ago",
+        "type": "note"
+      },
+      {
+        "id": "act-002",
+        "action": "You uploaded a Resume for Cody Fisher",
+        "timestamp": "yesterday",
+        "type": "document"
+      },
+      {
+        "id": "act-003",
+        "action": "You created the Design department",
+        "timestamp": "2 days ago",
+        "type": "department"
+      },
+      {
+        "id": "act-004",
+        "action": "You updated salary for Ralph Edwards",
+        "timestamp": "3 days ago",
+        "type": "salary"
+      },
+      {
+        "id": "act-005",
+        "action": "You created employee Martin Cooper",
+        "timestamp": "5 days ago",
+        "type": "employee"
+      }
+    ]
   }
 }
 ```

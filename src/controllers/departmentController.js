@@ -2,6 +2,7 @@ const { Sequelize } = require('sequelize');
 const { Department, Employee, Position } = require('../models');
 const AppError = require('../utils/AppError');
 const { generateDepartmentId, deriveAbbreviation } = require('../utils/generateId');
+const logActivity = require('../utils/activityLogger');
 
 // ─── 3.1 List Departments ───────────────────────────────────
 
@@ -100,6 +101,12 @@ exports.create = async (req, res, next) => {
       companyId: req.user.companyId,
     });
 
+    await logActivity({
+      action: `You created the ${department.name} department`,
+      type: 'department',
+      companyId: req.user.companyId,
+    });
+
     res.status(201).json({
       success: true,
       data: {
@@ -139,6 +146,12 @@ exports.update = async (req, res, next) => {
     }
 
     await department.update(updates);
+
+    await logActivity({
+      action: `You updated the ${department.name} department`,
+      type: 'department_edit',
+      companyId: req.user.companyId,
+    });
 
     res.json({
       success: true,

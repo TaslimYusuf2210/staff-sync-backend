@@ -416,6 +416,41 @@ const options = {
         },
 
         // ─── Dashboard Stats ────────────────────────────────
+        RecentEmployee: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: 'EMP-26-07-001' },
+            firstName: { type: 'string', example: 'Brooklyn' },
+            lastName: { type: 'string', example: 'Simmons' },
+            email: { type: 'string', example: 'brooklyn@mail.com' },
+            phoneNumber: { type: 'string', example: '+1 312 908 1234' },
+            department: { type: 'string', example: 'Design' },
+            position: { type: 'string', example: 'Senior UI Designer' },
+            employmentType: { type: 'string', example: 'Full-time' },
+            status: { type: 'string', example: 'Active' },
+            hireDate: { type: 'string', format: 'date', example: '2024-01-10' },
+            photoUrl: { type: 'string', nullable: true, example: 'https://cdn.staffsync.com/photos/emp-101.jpg' },
+          },
+        },
+        DepartmentOverview: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: 'DES-26-07-001' },
+            name: { type: 'string', example: 'Design' },
+            abbreviation: { type: 'string', example: 'DES' },
+            employeeCount: { type: 'integer', example: 12 },
+            head: { type: 'string', example: 'Sarah Johnson' },
+          },
+        },
+        RecentActivity: {
+          type: 'object',
+          properties: {
+            id: { type: 'string', example: 'act-001' },
+            action: { type: 'string', example: 'You added a note for Brooklyn Simmons' },
+            timestamp: { type: 'string', example: '2 hours ago' },
+            type: { type: 'string', enum: ['note', 'document', 'department', 'department_edit', 'employee', 'employee_delete', 'education', 'salary'] },
+          },
+        },
         DashboardStats: {
           type: 'object',
           properties: {
@@ -424,35 +459,20 @@ const options = {
             inactiveEmployees: { type: 'integer', example: 6 },
             totalDepartments: { type: 'integer', example: 4 },
             newEmployeesThisMonth: { type: 'integer', example: 3 },
-            employeesByDepartment: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  department: { type: 'string' },
-                  count: { type: 'integer' },
-                  percentage: { type: 'number' },
-                },
-              },
-            },
             statusDistribution: {
               type: 'object',
               properties: {
-                active: { type: 'integer' },
-                inactive: { type: 'integer' },
-                probation: { type: 'integer' },
-                resigned: { type: 'integer' },
-                terminated: { type: 'integer' },
+                active: { type: 'integer', example: 28 },
+                inactive: { type: 'integer', example: 1 },
+                probation: { type: 'integer', example: 2 },
+                onLeave: { type: 'integer', example: 1 },
+                resigned: { type: 'integer', example: 2 },
+                terminated: { type: 'integer', example: 1 },
               },
             },
-            recentEmployees: { type: 'array', items: { $ref: '#/components/schemas/Employee' } },
-            growthTrend: {
-              type: 'object',
-              properties: {
-                labels: { type: 'array', items: { type: 'string' } },
-                data: { type: 'array', items: { type: 'integer' } },
-              },
-            },
+            recentEmployees: { type: 'array', items: { $ref: '#/components/schemas/RecentEmployee' } },
+            departmentOverview: { type: 'array', items: { $ref: '#/components/schemas/DepartmentOverview' } },
+            recentActivity: { type: 'array', items: { $ref: '#/components/schemas/RecentActivity' } },
           },
         },
       },
