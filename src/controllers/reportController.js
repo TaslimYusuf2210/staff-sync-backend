@@ -1,3 +1,4 @@
+const PDFDocument = require('pdfkit');
 const { Op, fn, col } = require('sequelize');
 const { Employee, Department, Salary } = require('../models');
 
@@ -178,55 +179,198 @@ exports.hiringTrend = async (req, res, next) => {
 
 /**
  * GET /reports/export
- * Returns CSV-format report (placeholder — real export would stream a file).
+ * Export the full report (employee summary + salary summary + hiring trend)
+ * as either CSV or PDF.
  */
 exports.exportReport = async (req, res, next) => {
   try {
-    const { type, format } = req.query;
+    const format = req.query.format || 'csv';
+    const companyId = req.user.companyId;
 
-    if (!type) throw new (require('../utils/AppError'))('Report type is required', 400);
+    // ── Gather all data ────────────────────────────────────
+    const employees = await Employee.findAll({
+      where: { companyId },
+      include: [{ model: Department, as: 'Department', attributes: ['name'] }],
+      order: [['createdAt', 'DESC']],
+    });
 
-    const formatType = format || 'csv';
+    const salaries = await Salary.findAll({
+      include: [{
+        model: Employee,
+        as: 'Employee',
+        where: { companyId },
+      }],
+    });
 
-    let csvData = '';
-
-    if (type === 'employee-summary') {
-      const employees = await Employee.findAll({
-        include: [{ model: Department, as: 'Department', attributes: ['name'] }],
-      });
-      csvData = 'ID,First Name,Last Name,Email,Department,Position,Status,Hire Date\n';
-      employees.forEach((e) => {
-        csvData += `${e.id},${e.firstName},${e.lastName},${e.email},${e.Department?.name || ''},${e.position},${e.status},${e.hireDate}\n`;
-      });
-    } else if (type === 'salary-summary') {
-      const salaries = await Salary.findAll({
-        include: [{ model: Employee, as: 'Employee' }],
-      });
-      csvData = 'Employee ID,Name,Base Salary,Bonus,Allowances,Total\n';
-      salaries.forEach((s) => {
-        const total = (parseFloat(s.baseSalary) || 0) + (parseFloat(s.bonus) || 0) + (parseFloat(s.allowances) || 0);
-        csvData += `${s.employeeId},${s.Employee?.firstName} ${s.Employee?.lastName},${s.baseSalary},${s.bonus},${s.allowances},${total}\n`;
-      });
-    } else if (type === 'hiring-trend') {
-      csvData = 'Period,Hires\n';
-      const months = 12;
-      for (let i = months - 1; i >= 0; i--) {
-        const date = new Date();
-        date.setMonth(date.getMonth() - i);
-        const label = date.toLocaleString('default', { month: 'short', year: 'numeric' });
-        const start = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
-        const end = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
-        const count = await Employee.count({ where: { hireDate: { [Op.between]: [start, end] } } });
-        csvData += `${label},${count}\n`;
-      }
-    } else {
-      throw new (require('../utils/AppError'))('Invalid report type', 400);
+    const hiringLabels = [];
+    const hiringData = [];
+    const months = 12;
+    for (let i = months - 1; i >= 0; i--) {
+      const date = new Date();
+      date.setMonth(date.getMonth() - i);
+      const label = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+      hiringLabels.push(label);
+      const start = new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split('T')[0];
+      const end = new Date(date.getFullYear(), date.getMonth() + 1, 0).toISOString().split('T')[0];
+      const count = await Employee.count({ where: { hireDate: { [Op.between]: [start, end] }, companyId } });
+      hiringData.push(count);
     }
 
-    const filename = `${type}-${Date.now()}.${formatType}`;
-    res.setHeader('Content-Type', 'text/csv');
+    const filename = `StaffSync-Report-${Date.now()}.${format}`;
+
+    // ── CSV export ─────────────────────────────────────────
+    if (format === 'csv') {
+      let csv = '';
+
+      // Section 1: Employee Summary
+      csv += '=== EMPLOYEE SUMMARY ===\n';
+      csv += 'ID,First Name,Last Name,Email,Department,Position,Status,Hire Date\n';
+      employees.forEach((e) => {
+        csv += `${e.id},${e.firstName},${e.lastName},${e.email},${e.Department?.name || ''},${e.position},${e.status},${e.hireDate}\n`;
+      });
+
+      csv += '\n\n';
+
+      // Section 2: Salary Summary
+      csv += '=== SALARY SUMMARY ===\n';
+      csv += 'Employee ID,Name,Base Salary,Bonus,Allowances,Total\n';
+      salaries.forEach((s) => {
+        const total = (parseFloat(s.baseSalary) || 0) + (parseFloat(s.bonus) || 0) + (parseFloat(s.allowances) || 0);
+        csv += `${s.employeeId},${s.Employee?.firstName || ''} ${s.Employee?.lastName || ''},${s.baseSalary},${s.bonus},${s.allowances},${total}\n`;
+      });
+
+      csv += '\n\n';
+
+      // Section 3: Hiring Trend
+      csv += '=== HIRING TREND ===\n';
+      csv += 'Period,Hires\n';
+      hiringLabels.forEach((label, i) => {
+        csv += `${label},${hiringData[i]}\n`;
+      });
+
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      return res.send(csv);
+    }
+
+    // ── PDF export ─────────────────────────────────────────
+    const doc = new PDFDocument({ margin: 40 });
+    res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    res.send(csvData);
+    doc.pipe(res);
+
+    // Helper: draw a table row
+    function drawRow(docRef, columns, x, y, bold) {
+      let curX = x;
+      const colWidths = columns.map((c) => c.width);
+      columns.forEach((col, i) => {
+        if (bold) docRef.font('Helvetica-Bold');
+        else docRef.font('Helvetica');
+        docRef.fontSize(8).text(col.text, curX, y, { width: colWidths[i], align: 'left' });
+        curX += colWidths[i];
+      });
+    }
+
+    // Helper: draw a simple table
+    function drawTable(docRef, headers, rows, startY) {
+      const marginX = 40;
+      const colWidths = headers.map((h) => h.width);
+      let y = startY;
+
+      // Header row
+      docRef.font('Helvetica-Bold').fontSize(8);
+      let hx = marginX;
+      headers.forEach((h, i) => {
+        docRef.text(h.label, hx, y, { width: colWidths[i], align: 'left' });
+        hx += colWidths[i];
+      });
+      y += 14;
+      docRef.moveTo(marginX, y - 4).lineTo(marginX + colWidths.reduce((a, b) => a + b, 0), y - 4).stroke();
+      y += 4;
+
+      // Data rows
+      docRef.font('Helvetica').fontSize(8);
+      for (const row of rows) {
+        if (y > 750) {
+          docRef.addPage();
+          y = 40;
+          // Re-draw header on new page
+          docRef.font('Helvetica-Bold').fontSize(8);
+          let rx = marginX;
+          headers.forEach((h, i) => {
+            docRef.text(h.label, rx, y, { width: colWidths[i], align: 'left' });
+            rx += colWidths[i];
+          });
+          y += 14;
+          docRef.moveTo(marginX, y - 4).lineTo(marginX + colWidths.reduce((a, b) => a + b, 0), y - 4).stroke();
+          y += 4;
+          docRef.font('Helvetica').fontSize(8);
+        }
+        let cx = marginX;
+        row.forEach((val, i) => {
+          docRef.text(String(val), cx, y, { width: colWidths[i], align: 'left' });
+          cx += colWidths[i];
+        });
+        y += 14;
+      }
+      return y;
+    }
+
+    // ── Page 1: Employee Summary ───────────────────────────
+    doc.font('Helvetica-Bold').fontSize(18).text('StaffSync Report', 40, 40);
+    doc.font('Helvetica').fontSize(10).text(`Generated: ${new Date().toLocaleDateString()}`, 40, 65);
+    doc.moveTo(40, 85).lineTo(550, 85).stroke();
+    doc.font('Helvetica-Bold').fontSize(14).text('Employee Summary', 40, 100);
+
+    let currentY = 120;
+    const empHeaders = [
+      { label: 'ID', width: 80 },
+      { label: 'Name', width: 120 },
+      { label: 'Email', width: 140 },
+      { label: 'Department', width: 80 },
+      { label: 'Status', width: 60 },
+      { label: 'Hire Date', width: 70 },
+    ];
+    const empRows = employees.map((e) => [
+      e.id,
+      `${e.firstName} ${e.lastName}`,
+      e.email,
+      e.Department?.name || '',
+      e.status,
+      e.hireDate,
+    ]);
+    currentY = drawTable(doc, empHeaders, empRows, currentY);
+
+    // ── Page 2: Salary Summary ────────────────────────────
+    doc.addPage();
+    doc.font('Helvetica-Bold').fontSize(14).text('Salary Summary', 40, 40);
+    currentY = 60;
+    const salHeaders = [
+      { label: 'Employee', width: 120 },
+      { label: 'Base Salary', width: 80 },
+      { label: 'Bonus', width: 70 },
+      { label: 'Allowances', width: 80 },
+      { label: 'Total', width: 80 },
+    ];
+    const salRows = salaries.map((s) => {
+      const name = s.Employee ? `${s.Employee.firstName} ${s.Employee.lastName}` : 'Unknown';
+      const total = (parseFloat(s.baseSalary) || 0) + (parseFloat(s.bonus) || 0) + (parseFloat(s.allowances) || 0);
+      return [name, `₦${s.baseSalary}`, `₦${s.bonus}`, `₦${s.allowances}`, `₦${total.toFixed(2)}`];
+    });
+    currentY = drawTable(doc, salHeaders, salRows, currentY);
+
+    // ── Page 3: Hiring Trend ──────────────────────────────
+    doc.addPage();
+    doc.font('Helvetica-Bold').fontSize(14).text('Hiring Trend', 40, 40);
+    currentY = 60;
+    const trendHeaders = [
+      { label: 'Period', width: 120 },
+      { label: 'Hires', width: 80 },
+    ];
+    const trendRows = hiringLabels.map((label, i) => [label, hiringData[i]]);
+    drawTable(doc, trendHeaders, trendRows, currentY);
+
+    doc.end();
   } catch (error) {
     next(error);
   }

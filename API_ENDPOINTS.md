@@ -1428,9 +1428,9 @@ The `labels` array contains month abbreviations (e.g. `"Jan"`, `"Feb"`). The `da
 
 ---
 
-### 6.4 Export Reports
+### 6.4 Export Full Report
 
-Download a report as a CSV file.
+Download the complete report — **Employee Summary** + **Salary Summary** + **Hiring Trend** — all in one file.
 
 **`GET /reports/export`**
 
@@ -1439,58 +1439,40 @@ Download a report as a CSV file.
 **Query Parameters:**
 | Parameter | Type | Default | Description |
 |-----------|--------|---------|------------------------------------------|
-| type | string | — | Report type: `employee-summary`, `salary-summary`, `hiring-trend` |
-| format | string | `csv` | Export format (currently only `csv` is supported) |
+| format | string | `csv` | Export format: `csv` or `pdf` |
 
-**Success Response (200):**
+**Success Response (200) — CSV:**
 
-Returns the file as a downloadable CSV with these headers:
+Returns a single CSV file with three sections separated by headers and blank lines.
 
-| type               | Content-Type | Content-Disposition | Example filename                  |
-| ------------------ | ------------ | ------------------- | --------------------------------- |
-| `employee-summary` | `text/csv`   | `attachment`        | `employee-summary-1712345678.csv` |
-| `salary-summary`   | `text/csv`   | `attachment`        | `salary-summary-1712345678.csv`   |
-| `hiring-trend`     | `text/csv`   | `attachment`        | `hiring-trend-1712345678.csv`     |
-
-**Example CSV output for `employee-summary`:**
+**Headers:** `Content-Type: text/csv`, `Content-Disposition: attachment; filename="StaffSync-Report-<timestamp>.csv"`
 
 ```csv
+=== EMPLOYEE SUMMARY ===
 ID,First Name,Last Name,Email,Department,Position,Status,Hire Date
 EMP-26-07-001,Brooklyn,Simmons,brok-simms@mail.com,Design,Creative Director,Active,2024-01-10
 EMP-26-07-002,Cody,Fisher,cody.fisher@mail.com,Development,Lead Developer,Active,2024-01-12
-```
 
-**Example CSV output for `salary-summary`:**
-
-```csv
+=== SALARY SUMMARY ===
 Employee ID,Name,Base Salary,Bonus,Allowances,Total
 EMP-26-07-001,Brooklyn Simmons,8500,1500,500,10500
 EMP-26-07-002,Cody Fisher,7200,1000,300,8500
-```
 
-**Example CSV output for `hiring-trend`:**
-
-```csv
+=== HIRING TREND ===
 Period,Hires
 Jul 2025,3
 Aug 2025,1
 ```
 
-**Error Response (400):**
+**Success Response (200) — PDF:**
 
-```json
-{
-  "success": false,
-  "message": "Report type is required"
-}
-```
+Returns a multi-page PDF with formatted tables.
 
-```json
-{
-  "success": false,
-  "message": "Invalid report type"
-}
-```
+**Headers:** `Content-Type: application/pdf`, `Content-Disposition: attachment; filename="StaffSync-Report-<timestamp>.pdf"`
+
+- **Page 1:** Employee Summary table (ID, Name, Email, Department, Status, Hire Date)
+- **Page 2:** Salary Summary table (Employee, Base Salary, Bonus, Allowances, Total)
+- **Page 3:** Hiring Trend table (Period, Hires)
 
 ---
 
@@ -1799,7 +1781,7 @@ Check if the API is running.
 | 30  | GET    | `/reports/employee-summary`                | Employee summary report                   |
 | 31  | GET    | `/reports/salary-summary`                  | Salary/payroll report                     |
 | 32  | GET    | `/reports/hiring-trend`                    | Hiring growth trend data                  |
-| 33  | GET    | `/reports/export`                          | Export report as CSV/Excel/PDF            |
+| 33  | GET    | `/reports/export`                          | Export full report (CSV or PDF)           |
 | 34  | GET    | `/settings`                                | Get company settings                      |
 | 35  | PUT    | `/settings/company`                        | Update company info                       |
 

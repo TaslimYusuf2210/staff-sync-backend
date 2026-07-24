@@ -1096,16 +1096,14 @@ const options = {
       '/reports/export': {
         get: {
           tags: ['Reports'],
-          summary: 'Export Reports',
-          description: 'Download a report as a CSV file.',
+          summary: 'Export Full Report',
+          description: 'Download the complete report (Employee Summary + Salary Summary + Hiring Trend) as CSV or PDF.',
           security: [{ bearerAuth: [] }],
           parameters: [
-            { name: 'type', in: 'query', required: true, schema: { type: 'string', enum: ['employee-summary', 'salary-summary', 'hiring-trend'] } },
-            { name: 'format', in: 'query', schema: { type: 'string', enum: ['csv'], default: 'csv' } },
+            { name: 'format', in: 'query', schema: { type: 'string', enum: ['csv', 'pdf'], default: 'csv' } },
           ],
           responses: {
-            200: { description: 'CSV file download with Content-Type: text/csv and Content-Disposition: attachment' },
-            400: { description: 'Invalid or missing report type', content: { 'application/json': { schema: { $ref: '#/components/schemas/ErrorResponse' } } } },
+            200: { description: 'File download. CSV: text/csv. PDF: application/pdf. Both with Content-Disposition: attachment.' },
           },
         },
       },
