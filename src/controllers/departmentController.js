@@ -192,6 +192,7 @@ exports.employeeCount = async (req, res, next) => {
           as: 'Employees',
           attributes: [],
           where: { companyId },
+          required: false,
         },
       ],
       group: ['Department.id', 'Department.name'],
