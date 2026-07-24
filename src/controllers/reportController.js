@@ -48,17 +48,27 @@ exports.employeeSummary = async (req, res, next) => {
  */
 exports.salarySummary = async (req, res, next) => {
   try {
+    const companyId = req.user.companyId;
+
+    // Get all departments for this company (including those with 0 employees)
+    const departments = await Department.findAll({
+      where: { companyId },
+      attributes: ['id', 'name'],
+    });
+
+    // Get all salaries for this company, with employee and department info
     const salaries = await Salary.findAll({
       include: [{
         model: Employee,
         as: 'Employee',
-        where: { companyId: req.user.companyId },
+        where: { companyId },
         include: [{ model: Department, as: 'Department', attributes: ['name'] }],
       }],
     });
 
-    let totalMonthlyPayroll = 0;
+    // Build a map: department name → salary stats
     const deptMap = {};
+    let totalMonthlyPayroll = 0;
 
     for (const s of salaries) {
       const base = parseFloat(s.baseSalary) || 0;
@@ -75,15 +85,33 @@ exports.salarySummary = async (req, res, next) => {
       deptMap[deptName].count += 1;
     }
 
-    const salaryDistributionByDepartment = Object.entries(deptMap).map(([department, data]) => ({
-      department,
-      averageSalary: data.count > 0 ? parseFloat((data.totalPayroll / data.count).toFixed(2)) : 0,
-      totalPayroll: parseFloat(data.totalPayroll.toFixed(2)),
-      employeeCount: data.count,
-    }));
+    // Build the distribution — start with all known departments, then add Others
+    const salaryDistributionByDepartment = [];
 
-    const avgCompensation =
-      salaries.length > 0 ? parseFloat((totalMonthlyPayroll / salaries.length).toFixed(2)) : 0;
+    for (const dept of departments) {
+      const existing = deptMap[dept.name];
+      salaryDistributionByDepartment.push({
+        department: dept.name,
+        averageSalary: existing ? parseFloat((existing.totalPayroll / existing.count).toFixed(2)) : 0,
+        totalPayroll: existing ? parseFloat(existing.totalPayroll.toFixed(2)) : 0,
+        employeeCount: existing ? existing.count : 0,
+      });
+    }
+
+    // Add "Others" group (employees without a department) if any exist
+    if (deptMap['Others']) {
+      salaryDistributionByDepartment.push({
+        department: 'Others',
+        averageSalary: parseFloat((deptMap['Others'].totalPayroll / deptMap['Others'].count).toFixed(2)),
+        totalPayroll: parseFloat(deptMap['Others'].totalPayroll.toFixed(2)),
+        employeeCount: deptMap['Others'].count,
+      });
+    }
+
+    const employeeCount = salaries.length;
+    const avgCompensation = employeeCount > 0
+      ? parseFloat((totalMonthlyPayroll / employeeCount).toFixed(2))
+      : 0;
 
     const allValues = salaries.map((s) => {
       const base = parseFloat(s.baseSalary) || 0;
